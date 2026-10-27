@@ -1,0 +1,557 @@
+openapi: 3.1.0
+info:
+  title: EventoSports API
+  version: 0.2.0
+  description: 'API de EventoSports del taller integrador S7: PostgreSQL, login con bcrypt, JWT de una hora y permisos por rol y propiedad. Los GET de eventos y el login son publicos. Las demas operaciones requieren sesion.'
+  contact:
+    name: Sebastian Mendoza y Evelin Quijije
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+security:
+  - sesion: []
+tags:
+  - name: Eventos
+    description: Publicacion y consulta de eventos deportivos
+  - name: Inscripciones
+    description: Reservas y cambios de estado
+  - name: Sesion
+    description: Inicio de sesion JWT
+paths:
+  /eventos:
+    get:
+      operationId: listarEventos
+      summary: Lista los eventos
+      tags:
+        - Eventos
+      responses:
+        '200':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventoVista'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+      security: []
+      parameters:
+        - name: deporte
+          in: query
+          description: Filtro por deporte
+          schema:
+            type: string
+            enum:
+              - futbol
+              - padel
+              - tenis
+              - basquet
+              - natacion
+        - name: nivel
+          in: query
+          description: Filtro por nivel
+          schema:
+            type: string
+            enum:
+              - casual
+              - amateur
+              - competitivo
+        - name: ciudad
+          in: query
+          description: Filtro por ciudad
+          schema:
+            type: string
+    post:
+      operationId: crearEvento
+      summary: Publica un evento; solo organizador
+      tags:
+        - Eventos
+      responses:
+        '201':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventoVista'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventoNuevo'
+  /eventos/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: Identificador del recurso
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    get:
+      operationId: verEvento
+      summary: Consulta un evento
+      tags:
+        - Eventos
+      responses:
+        '200':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventoVista'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+      security:
+        - {}
+        - sesion: []
+      description: Consulta publica. Si se envia Authorization, el token se valida; para un jugador se incluye su ultima inscripcion. Sin token no se devuelve informacion personal.
+  /eventos/{id}/inscripciones:
+    parameters:
+      - name: id
+        in: path
+        description: Identificador del recurso
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    post:
+      operationId: crearInscripcion
+      summary: Reserva un cupo; solo jugador
+      tags:
+        - Inscripciones
+      responses:
+        '201':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inscripcion'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '500':
+          $ref: '#/components/responses/Error500'
+    get:
+      operationId: listarInscripciones
+      summary: Lista inscripciones; solo organizador del evento
+      tags:
+        - Inscripciones
+      responses:
+        '200':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InscripcionVista'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /inscripciones/{id}/estado:
+    parameters:
+      - name: id
+        in: path
+        description: Identificador del recurso
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    patch:
+      operationId: cambiarEstadoInscripcion
+      summary: Cambia el estado segun rol y propiedad
+      tags:
+        - Inscripciones
+      responses:
+        '200':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inscripcion'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambioEstado'
+      description: 'Jugador: sus inscripciones. Organizador: las de sus eventos. La transicion prohibida responde 422; los conflictos de cupos, pago previo o plazo responden 409. cancelada es final. Banco y referencia son obligatorios al pasar a pago_por_verificar; el monto procede del precio del evento.'
+  /login:
+    post:
+      operationId: iniciarSesion
+      summary: Entrega un JWT a cambio de usuario y clave
+      tags:
+        - Sesion
+      responses:
+        '200':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credenciales'
+      security: []
+components:
+  securitySchemes:
+    sesion:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        nombre:
+          type: string
+        correo:
+          type: string
+          format: email
+        rol:
+          type: string
+          enum:
+            - jugador
+            - organizador
+        ruc:
+          type: string
+        whatsapp:
+          type: string
+      required:
+        - id
+      description: Modelo de usuario; las vistas resumidas pueden devolver solo id y nombre.
+    Sede:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        nombre:
+          type: string
+        ciudad:
+          type: string
+        referencia:
+          type: string
+        latitud:
+          type: number
+        longitud:
+          type: number
+      required:
+        - id
+        - nombre
+        - ciudad
+        - referencia
+    EventoNuevo:
+      type: object
+      properties:
+        titulo:
+          type: string
+          minLength: 1
+        deporte:
+          type: string
+          enum:
+            - futbol
+            - padel
+            - tenis
+            - basquet
+            - natacion
+        nivel:
+          type: string
+          enum:
+            - casual
+            - amateur
+            - competitivo
+        inicio:
+          type: string
+          format: date-time
+        cupos:
+          type: integer
+          minimum: 1
+        precio:
+          type: number
+          minimum: 0
+          default: 0
+        sede_id:
+          type: integer
+          minimum: 1
+      required:
+        - titulo
+        - deporte
+        - nivel
+        - inicio
+        - cupos
+        - sede_id
+    Evento:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        titulo:
+          type: string
+          minLength: 1
+        deporte:
+          type: string
+          enum:
+            - futbol
+            - padel
+            - tenis
+            - basquet
+            - natacion
+        nivel:
+          type: string
+          enum:
+            - casual
+            - amateur
+            - competitivo
+        inicio:
+          type: string
+          format: date-time
+        cupos:
+          type: integer
+          minimum: 1
+        precio:
+          type: number
+          minimum: 0
+        sede_id:
+          type: integer
+          minimum: 1
+        organizador_id:
+          type: integer
+          minimum: 1
+      required:
+        - id
+        - titulo
+        - deporte
+        - nivel
+        - inicio
+        - cupos
+        - precio
+        - sede_id
+        - organizador_id
+    Inscripcion:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        evento_id:
+          type: integer
+          minimum: 1
+        jugador_id:
+          type: integer
+          minimum: 1
+        estado:
+          type: string
+          enum:
+            - reservada
+            - pago_por_verificar
+            - confirmada
+            - cancelada
+        creado:
+          type: string
+          format: date-time
+      required:
+        - id
+        - evento_id
+        - jugador_id
+        - estado
+        - creado
+    Pago:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        inscripcion_id:
+          type: integer
+          minimum: 1
+        monto:
+          type: number
+        banco:
+          type: string
+        referencia:
+          type: string
+        verificado:
+          type: boolean
+        creado:
+          type: string
+          format: date-time
+      required:
+        - id
+        - inscripcion_id
+        - monto
+        - banco
+        - referencia
+        - verificado
+        - creado
+    CambioEstado:
+      type: object
+      properties:
+        estado:
+          type: string
+          enum:
+            - reservada
+            - pago_por_verificar
+            - confirmada
+            - cancelada
+        banco:
+          type: string
+        referencia:
+          type: string
+      required:
+        - estado
+      description: Los campos banco y referencia se exigen para pasar a pago_por_verificar. No se acepta un monto enviado por el cliente.
+    Credenciales:
+      type: object
+      properties:
+        usuario:
+          type: string
+        clave:
+          type: string
+          format: password
+      required:
+        - usuario
+        - clave
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    EventoVista:
+      allOf:
+        - $ref: '#/components/schemas/Evento'
+        - type: object
+          properties:
+            sede:
+              $ref: '#/components/schemas/Sede'
+            cupos_libres:
+              type: integer
+            mi_inscripcion:
+              $ref: '#/components/schemas/Inscripcion'
+          required:
+            - sede
+            - cupos_libres
+    InscripcionVista:
+      allOf:
+        - $ref: '#/components/schemas/Inscripcion'
+        - type: object
+          properties:
+            jugador:
+              $ref: '#/components/schemas/Usuario'
+            ultimo_pago:
+              $ref: '#/components/schemas/Pago'
+          required:
+            - jugador
+  responses:
+    Error400:
+      description: ID o JSON mal formado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error401:
+      description: Credenciales o token ausentes, invalidos o vencidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error403:
+      description: Rol o propiedad sin permiso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error404:
+      description: Recurso inexistente
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error409:
+      description: Inscripcion repetida, falta de cupos, pago previo requerido o conflicto temporal
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error422:
+      description: Estado desconocido, transicion prohibida o datos que incumplen una regla de validacion
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error500:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

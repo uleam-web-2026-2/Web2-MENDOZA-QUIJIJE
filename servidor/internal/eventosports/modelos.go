@@ -2,8 +2,7 @@ package eventosports
 
 import "time"
 
-// Structs de la sección 4 de la ficha. Las etiquetas de GORM quedan listas para cuando se conecte PostgreSQL;
-// mientras tanto el servidor guarda los datos en memoria.
+// Structs del hito 1. Las relaciones crean claves foraneas al migrar PostgreSQL.
 
 type Usuario struct {
 	ID       uint    `gorm:"primaryKey" json:"id"`
@@ -33,6 +32,8 @@ type Evento struct {
 	Precio        float64   `gorm:"type:numeric(8,2);not null;default:0" json:"precio"`
 	OrganizadorID uint      `gorm:"not null" json:"organizador_id"`
 	SedeID        uint      `gorm:"not null" json:"sede_id"`
+	Organizador   Usuario   `gorm:"foreignKey:OrganizadorID" json:"-"`
+	Sede          Sede      `gorm:"foreignKey:SedeID" json:"-"`
 }
 
 type Inscripcion struct {
@@ -41,14 +42,23 @@ type Inscripcion struct {
 	JugadorID uint      `gorm:"not null;index" json:"jugador_id"`
 	Estado    string    `gorm:"not null;default:reservada" json:"estado"` // reservada | pago_por_verificar | confirmada | cancelada
 	Creado    time.Time `gorm:"autoCreateTime" json:"creado"`
+	Evento    Evento    `gorm:"foreignKey:EventoID" json:"-"`
+	Jugador   Usuario   `gorm:"foreignKey:JugadorID" json:"-"`
 }
 
 type Pago struct {
-	ID            uint      `gorm:"primaryKey" json:"id"`
-	InscripcionID uint      `gorm:"not null" json:"inscripcion_id"`
-	Monto         float64   `gorm:"type:numeric(8,2);not null" json:"monto"`
-	Banco         string    `gorm:"not null" json:"banco"`
-	Referencia    string    `gorm:"not null" json:"referencia"`
-	Verificado    bool      `gorm:"not null;default:false" json:"verificado"`
-	Creado        time.Time `gorm:"autoCreateTime" json:"creado"`
+	ID            uint        `gorm:"primaryKey" json:"id"`
+	InscripcionID uint        `gorm:"not null" json:"inscripcion_id"`
+	Monto         float64     `gorm:"type:numeric(8,2);not null" json:"monto"`
+	Banco         string      `gorm:"not null" json:"banco"`
+	Referencia    string      `gorm:"not null" json:"referencia"`
+	Verificado    bool        `gorm:"not null;default:false" json:"verificado"`
+	Creado        time.Time   `gorm:"autoCreateTime" json:"creado"`
+	Inscripcion   Inscripcion `gorm:"foreignKey:InscripcionID" json:"-"`
 }
+
+func (Usuario) TableName() string     { return "usuarios" }
+func (Sede) TableName() string        { return "sedes" }
+func (Evento) TableName() string      { return "eventos" }
+func (Inscripcion) TableName() string { return "inscripciones" }
+func (Pago) TableName() string        { return "pagos" }

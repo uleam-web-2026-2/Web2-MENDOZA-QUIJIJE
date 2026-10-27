@@ -1,34 +1,34 @@
 package eventosports
 
 import (
+	"eventosports/internal/sesion"
+	"github.com/go-chi/chi/v5"
 	"net/http"
-	"strings"
 )
 
-// Rutas registra los seis endpoints de la sección 7 de la ficha (enrutado a mano, funciona con cualquier versión de Go).
-func (s *Servidor) Rutas() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-		switch {
-		case len(p) == 1 && p[0] == "eventos":
-			switch r.Method {
-			case http.MethodGet:
-				s.listarEventos(w, r)
-			case http.MethodPost:
-				s.crearEvento(w, r)
-			default:
-				responderError(w, http.StatusMethodNotAllowed, "método no permitido")
+// Rutas es la misma matriz de seguridad en main y en las pruebas.
+func (m *Manejador) Rutas(r chi.Router, tokens *sesion.Tokens) {
+	r.Get("/eventos", m.listarEventos)
+	// La consulta sigue siendo publica. Si se envia token, se valida para
+	// incluir la inscripcion del jugador, como en el detalle del hito 1.
+	r.With(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Header.Get("Authorization") != "" {
+				tokens.Autenticar(next).ServeHTTP(w, r)
+				return
 			}
-		case len(p) == 2 && p[0] == "eventos" && r.Method == http.MethodGet:
-			s.verEvento(w, r, p[1])
-		case len(p) == 3 && p[0] == "eventos" && p[2] == "inscripciones" && r.Method == http.MethodPost:
-			s.crearInscripcion(w, r, p[1])
-		case len(p) == 3 && p[0] == "eventos" && p[2] == "inscripciones" && r.Method == http.MethodGet:
-			s.listarInscripciones(w, r, p[1])
-		case len(p) == 3 && p[0] == "inscripciones" && p[2] == "estado" && r.Method == http.MethodPatch:
-			s.cambiarEstado(w, r, p[1])
-		default:
-			responderError(w, http.StatusNotFound, "ruta no encontrada")
-		}
+			next.ServeHTTP(w, r)
+		})
+	}).Get("/eventos/{id}", m.verEvento)
+	r.Post("/login", (&sesion.Manejador{DB: m.DB, Tokens: tokens}).Login)
+	r.Group(func(r chi.Router) {
+		r.Use(tokens.Autenticar)
+		r.With(sesion.SoloRol(sesion.RolOrganizador)).Post("/eventos", m.crearEvento)
+		r.With(sesion.SoloRol(sesion.RolJugador)).Post("/eventos/{id}/inscripciones", m.crearInscripcion)
+		r.With(sesion.SoloRol(sesion.RolOrganizador)).Get("/eventos/{id}/inscripciones", m.listarInscripciones)
+		// Ambos roles pueden entrar; la transicion y la propiedad deciden el permiso.
+		r.Patch("/inscripciones/{id}/estado", m.cambiarEstado)
 	})
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) { responderError(w, 404, "ruta no encontrada") })
+	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) { responderError(w, 405, "metodo no permitido") })
 }

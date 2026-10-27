@@ -23,6 +23,7 @@ var transiciones = map[string]map[string]quien{
 	"confirmada": {
 		"cancelada": {Jugador: true, Organizador: true},
 	},
+	"cancelada": {},
 }
 
 // transicionPermitida consulta la tabla de transiciones: es lo que bloquea cancelada → confirmada.
