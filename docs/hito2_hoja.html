@@ -1,0 +1,132 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Hoja Hito 2 - EventoSports</title><style>@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;background:#ddd;color:#172238;font:9.5pt/1.3 Arial,sans-serif}.sheet{width:210mm;min-height:297mm;margin:auto;background:white;padding:14mm}h1{font-size:16pt;margin:0 0 8pt}h2{font-size:11.5pt;margin:12pt 0 6pt}p{margin:6pt 0}table{border-collapse:collapse;width:100%;font-size:8.2pt;table-layout:auto}th,td{border:1px solid #ccd5df;padding:4pt;text-align:left;vertical-align:top}th{background:#eef3f8}code{font:7.8pt Consolas,monospace;overflow-wrap:anywhere}@media print{body{background:white}.sheet{margin:0}}</style><article class="sheet"><section class="content"><h1>Hito 2 · EventoSports · Grupo E · Web II A</h1>
+<p><strong>Sebastián Mendoza · Evelin Quijije</strong> · Entidad principal: Inscripción. Antes de cada turno: ejecutar petición <strong>0</strong> en Bruno; prepara registros nuevos y variables de ejecución. Entorno <strong>Local</strong>, <code>http://localhost:8080</code>.</p>
+<h2>1 · Usuarios de ejemplo</h2>
+<table>
+<thead>
+<tr>
+<th>Usuario</th>
+<th>Rol</th>
+<th>Contraseña de ejemplo</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ana</td>
+<td>jugador</td>
+<td>ana-2026</td>
+</tr>
+<tr>
+<td>luis</td>
+<td>organizador</td>
+<td>luis-2026</td>
+</tr>
+</tbody></table>
+<h2>2 · Las seis peticiones</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Petición</th>
+<th>Credencial</th>
+<th>Debe responder</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>GET /eventos/{{eventoId}}/inscripciones</code></td>
+<td>Ninguna</td>
+<td>401</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>POST /login</code> con Luis</td>
+<td>Ninguna</td>
+<td>200 y token</td>
+</tr>
+<tr>
+<td>3</td>
+<td>La misma ruta de 1</td>
+<td>Token de Luis</td>
+<td>200</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>PATCH /inscripciones/{{inscripcionId}}/estado</code> → confirmada</td>
+<td>Token de Ana</td>
+<td>403</td>
+</tr>
+<tr>
+<td>5</td>
+<td>La misma petición de 4</td>
+<td>Token de Luis</td>
+<td>200</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>PATCH /inscripciones/{{canceladaId}}/estado</code> → confirmada</td>
+<td>Token de Luis</td>
+<td>422</td>
+</tr>
+</tbody></table>
+<p>En 4–5 la inscripción está en <code>pago_por_verificar</code>: solo el organizador dueño puede verificar. En 6 está <code>cancelada</code>, estado final. Los tokens e IDs los prepara la colección; no se pega un token de otro día.</p>
+<h2>3 · Matriz ruta × rol</h2>
+<table>
+<thead>
+<tr>
+<th>Ruta implementada</th>
+<th>Sin sesión</th>
+<th>Jugador</th>
+<th>Organizador</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST /login</code></td>
+<td>Sí, con credenciales</td>
+<td>Sí</td>
+<td>Sí</td>
+</tr>
+<tr>
+<td><code>GET /eventos</code></td>
+<td>Sí</td>
+<td>Sí</td>
+<td>Sí</td>
+</tr>
+<tr>
+<td><code>GET /eventos/{id}</code></td>
+<td>Sí</td>
+<td>Sí</td>
+<td>Sí</td>
+</tr>
+<tr>
+<td><code>POST /eventos</code></td>
+<td>401</td>
+<td>403</td>
+<td>Sí</td>
+</tr>
+<tr>
+<td><code>POST /eventos/{id}/inscripciones</code></td>
+<td>401</td>
+<td>Sí, para sí mismo</td>
+<td>403</td>
+</tr>
+<tr>
+<td><code>GET /eventos/{id}/inscripciones</code></td>
+<td>401</td>
+<td>403</td>
+<td>Solo sus eventos</td>
+</tr>
+<tr>
+<td><code>GET /inscripciones/{id}</code></td>
+<td>401</td>
+<td>Solo su inscripción</td>
+<td>Solo sus eventos</td>
+</tr>
+<tr>
+<td><code>PATCH /inscripciones/{id}/estado</code></td>
+<td>401</td>
+<td>Propia y transición permitida</td>
+<td>Evento propio y transición permitida</td>
+</tr>
+</tbody></table>
+<h2>4 · Recuadro de cumplimiento</h2>
+<p>☑ Structs, relaciones y tablas · ☑ Contrato sin errores ni avisos · ☑ Peticiones 0–6 en orden · ☑ Respuestas coinciden con esta hoja · ☑ Pruebas en verde e integración PostgreSQL · ☑ Capas explicadas en <code>docs/decisiones.md</code> · ☑ Capturas del informe de ejecución verificadas.</p>
+</section></article></html>

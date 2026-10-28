@@ -20,6 +20,7 @@ func TestSinTokenLasRutasProtegidasResponden401(t *testing.T) {
 		{"POST", "/eventos", `{}`},
 		{"POST", "/eventos/25/inscripciones", ""},
 		{"GET", "/eventos/25/inscripciones", ""},
+		{"GET", "/inscripciones/1", ""},
 		{"PATCH", "/inscripciones/1/estado", `{"estado":"confirmada"}`},
 	}
 

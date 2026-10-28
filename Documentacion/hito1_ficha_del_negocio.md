@@ -275,7 +275,7 @@ stateDiagram-v2
 
 ## 7. Mapa de endpoints por rol
 
-Identificación en este hito: el usuario y su rol llegan en los encabezados `X-Usuario-ID` y `X-Rol`; el inicio de sesión real es de un hito posterior.
+Identificación en la versión original del hito 1 (sustituida por JWT en el hito 2): el usuario y su rol llegan en los encabezados `X-Usuario-ID` y `X-Rol`; el inicio de sesión real es de un hito posterior.
 
 | Endpoint | Rol que lo llama | Pantalla que lo consume | Qué devuelve | Qué valida | Código si falla |
 |----------|------------------|-------------------------|--------------|------------|-----------------|
@@ -298,3 +298,18 @@ Identificación en este hito: el usuario y su rol llegan en los encabezados `X-U
 | Panel del organizador (organizador) | | | | | ✓ | ✓ |
 
 **Endpoints que ya están funcionando y en qué archivo:** los seis, con los datos en memoria por ahora: las rutas están en `servidor/internal/eventosports/rutas.go`, los manejadores en `servidor/internal/eventosports/manejadores.go` y las listas cerradas y la tabla de transiciones en `servidor/internal/eventosports/validaciones.go`.
+
+
+## Actualización del mapa para el Hito 2
+
+El mapa anterior conserva el diseño original del hito 1. La implementación actual usa JWT, PostgreSQL y las capas de `servidor/internal/`. El contrato vigente es `docs/openapi.yaml`; la matriz completa está en `docs/hito2_hoja.md`. La transición prohibida ahora devuelve **422**. Los structs vigentes están en `servidor/internal/modelo/modelos.go`; el modelo de negocio y sus relaciones se conservan. La tabla `cuentas` se agregó exclusivamente para el login, separada de `usuarios`.
+
+| Operación adicional | Estado | Motivo |
+|---|---|---|
+| `POST /login` | Implementada | Sesión exigida en S7 y Hito 2 |
+| `GET /inscripciones/{id}` | Implementada | Consulta individual mínima de la entidad principal; solo dueños |
+| `GET /usuarios` y `POST /usuarios` | Plan, sin código HTTP | Perfiles del negocio; no son registro ni CRUD de cuentas de sesión |
+| `GET /sedes` y `POST /sedes` | Plan, sin código HTTP | Gestión futura de lugares |
+| `GET /inscripciones/{id}/pagos` y `POST /inscripciones/{id}/pagos` | Plan, sin código HTTP | Gestión futura independiente del historial; hoy el comprobante se registra mediante el cambio de estado |
+
+Todos los summaries de estas seis operaciones futuras terminan en `(plan)`. No se agregaron endpoints implementados para una tercera entidad.

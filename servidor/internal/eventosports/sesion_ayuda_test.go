@@ -6,7 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"eventosports/internal/sesion" // CAMBIEN: «mesa-ayuda» por SU módulo
+	"eventosports/internal/negocio" // CAMBIEN: «mesa-ayuda» por SU módulo
+	"eventosports/internal/sesion"
 )
 
 // rolDePrueba es el rol con el que entran las pruebas de la semana 4:
@@ -16,13 +17,13 @@ const rolDePrueba = sesion.RolOrganizador // CAMBIEN: «RolAgente» por SU rol
 // tokensDePrueba firma con un secreto que solo existe en las pruebas.
 var tokensDePrueba = sesion.NuevosTokens("secreto-solo-de-las-pruebas")
 
-// enrutadorCon arma el servidor de prueba, SIN base de datos (DB: nil),
+// enrutadorCon arma el servidor de prueba, SIN almacen de datos (Almacen: nil),
 // con las mismas rutas y los mismos niveles que usa main.go.
 // Con un rol, todas las peticiones entran con el token de un usuario de
 // ese rol. Con "" entran sin token.
 func enrutadorCon(rol string) http.Handler {
 	r := chi.NewRouter()
-	(&Manejador{DB: nil}).Rutas(r, tokensDePrueba) // el mismo Rutas de main.go
+	(&Manejador{Servicio: &negocio.Servicio{}, Sesion: &sesion.Manejador{Tokens: tokensDePrueba}}).Rutas(r, tokensDePrueba) // el mismo Rutas de main.go
 	if rol == "" {
 		return r
 	}

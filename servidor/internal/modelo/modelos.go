@@ -1,4 +1,4 @@
-package eventosports
+package modelo
 
 import "time"
 

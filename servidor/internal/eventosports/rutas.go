@@ -20,7 +20,7 @@ func (m *Manejador) Rutas(r chi.Router, tokens *sesion.Tokens) {
 			next.ServeHTTP(w, r)
 		})
 	}).Get("/eventos/{id}", m.verEvento)
-	r.Post("/login", (&sesion.Manejador{DB: m.DB, Tokens: tokens}).Login)
+	r.Post("/login", m.Sesion.Login)
 	r.Group(func(r chi.Router) {
 		r.Use(tokens.Autenticar)
 		r.With(sesion.SoloRol(sesion.RolOrganizador)).Post("/eventos", m.crearEvento)
@@ -28,6 +28,7 @@ func (m *Manejador) Rutas(r chi.Router, tokens *sesion.Tokens) {
 		r.With(sesion.SoloRol(sesion.RolOrganizador)).Get("/eventos/{id}/inscripciones", m.listarInscripciones)
 		// Ambos roles pueden entrar; la transicion y la propiedad deciden el permiso.
 		r.Patch("/inscripciones/{id}/estado", m.cambiarEstado)
+		r.Get("/inscripciones/{id}", m.verInscripcion)
 	})
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) { responderError(w, 404, "ruta no encontrada") })
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) { responderError(w, 405, "metodo no permitido") })

@@ -1,0 +1,29 @@
+meta {
+  name: 5 - Organizador verifica pago
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/inscripciones/{{inscripcionId}}/estado
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{tokenOrganizador}}
+}
+
+body:json {
+  {
+    "estado": "confirmada"
+  }
+}
+
+tests {
+  test("Respuesta 200", function () {
+    expect(res.status).to.equal(200);
+  });
+  test("Queda confirmada", function () { expect(res.body.estado).to.equal("confirmada"); });
+}

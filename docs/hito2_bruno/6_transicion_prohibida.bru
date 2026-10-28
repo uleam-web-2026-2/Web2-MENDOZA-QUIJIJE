@@ -1,0 +1,28 @@
+meta {
+  name: 6 - Cancelada no vuelve a confirmada
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/inscripciones/{{canceladaId}}/estado
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{tokenOrganizador}}
+}
+
+body:json {
+  {
+    "estado": "confirmada"
+  }
+}
+
+tests {
+  test("Respuesta 422", function () {
+    expect(res.status).to.equal(422);
+  });
+}

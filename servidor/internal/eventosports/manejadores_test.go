@@ -3,6 +3,9 @@ package eventosports
 import (
 	"encoding/base64"
 	"encoding/json"
+	"eventosports/internal/datos"
+	"eventosports/internal/modelo"
+	"eventosports/internal/negocio"
 	"eventosports/internal/sesion"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -59,15 +62,15 @@ func TestValidacionesAntesDeConsultarBase(t *testing.T) {
 	}
 }
 func TestCanceladaEsFinal(t *testing.T) {
-	for estado := range estados {
-		if transicionPermitida("cancelada", estado) {
+	for _, estado := range []string{"reservada", "pago_por_verificar", "confirmada", "cancelada"} {
+		if negocio.TransicionPermitida("cancelada", estado) {
 			t.Fatal("cancelada no puede cambiar de estado")
 		}
 	}
 }
 func TestIdentidadNoSeAceptaDesdeCabeceras(t *testing.T) {
 	req := httptest.NewRequest("POST", "/eventos", strings.NewReader(`{}`))
-	req.Header.Set("X-Usuario-ID", "2")
+	req.Header.Set("X-modelo.Usuario-ID", "2")
 	req.Header.Set("X-Rol", "organizador")
 	rec := httptest.NewRecorder()
 	enrutadorCon("").ServeHTTP(rec, req)
@@ -128,17 +131,17 @@ func baseDePrueba(t *testing.T) *gorm.DB {
 	}
 	sqlDB, _ := db.DB()
 	t.Cleanup(func() { sqlDB.Close() })
-	if err := Migrar(db); err != nil {
+	if err := datos.Migrar(db); err != nil {
 		t.Fatal(err)
 	}
-	if err := SembrarDemo(db); err != nil {
+	if err := datos.SembrarDemo(db); err != nil {
 		t.Fatal(err)
 	}
 	return db
 }
 func servidorDB(db *gorm.DB) http.Handler {
 	r := chi.NewRouter()
-	(&Manejador{DB: db}).Rutas(r, tokensDePrueba)
+	(&Manejador{Servicio: &negocio.Servicio{Almacen: &datos.AlmacenGORM{DB: db}}, Sesion: &sesion.Manejador{DB: db, Tokens: tokensDePrueba}}).Rutas(r, tokensDePrueba)
 	return r
 }
 func login(t *testing.T, h http.Handler, usuario, clave string) string {
@@ -153,11 +156,11 @@ func login(t *testing.T, h http.Handler, usuario, clave string) string {
 	}
 	return v.Token
 }
-func crearReserva(t *testing.T, h http.Handler, event uint, token string) Inscripcion {
+func crearReserva(t *testing.T, h http.Handler, event uint, token string) modelo.Inscripcion {
 	t.Helper()
 	r := llamar(h, "POST", fmt.Sprintf("/eventos/%d/inscripciones", event), "", token)
 	esperar(t, r, 201)
-	var i Inscripcion
+	var i modelo.Inscripcion
 	if err := json.Unmarshal(r.Body.Bytes(), &i); err != nil {
 		t.Fatal(err)
 	}
@@ -175,21 +178,23 @@ func TestIntegracionSeisPeticionesYPersistencia(t *testing.T) {
 	i := crearReserva(t, h, 25, jug)
 	detalle := llamar(h, "GET", "/eventos/25", "", jug)
 	esperar(t, detalle, 200)
-	var personal eventoVista
+	var personal negocio.EventoVista
 	if err := json.Unmarshal(detalle.Body.Bytes(), &personal); err != nil || personal.MiInscripcion == nil || personal.MiInscripcion.ID != i.ID {
 		t.Fatal("el detalle autenticado debe conservar la inscripcion del jugador")
 	}
+	esperar(t, llamar(h, "GET", fmt.Sprintf("/inscripciones/%d", i.ID), "", jug), 200)
+	esperar(t, llamar(h, "GET", fmt.Sprintf("/inscripciones/%d", i.ID), "", org), 200)
 	ruta := fmt.Sprintf("/inscripciones/%d/estado", i.ID)
 	esperar(t, llamar(h, "PATCH", ruta, `{"estado":"pago_por_verificar","banco":"Pichincha","referencia":"DEMO-1"}`, jug), 200)
 	esperar(t, llamar(h, "PATCH", ruta, `{"estado":"confirmada"}`, jug), 403)
 	esperar(t, llamar(h, "PATCH", ruta, `{"estado":"confirmada"}`, org), 200)
 	// Otra instancia del manejador ve los mismos datos guardados en PostgreSQL.
 	h = servidorDB(db)
-	var guardada Inscripcion
+	var guardada modelo.Inscripcion
 	if err := db.First(&guardada, i.ID).Error; err != nil || guardada.Estado != "confirmada" {
 		t.Fatal("el estado no persistio")
 	}
-	var pago Pago
+	var pago modelo.Pago
 	if err := db.Where("inscripcion_id = ?", i.ID).First(&pago).Error; err != nil || !pago.Verificado {
 		t.Fatal("pago sin verificar")
 	}
@@ -208,7 +213,7 @@ func TestIntegracionSeisPeticionesYPersistencia(t *testing.T) {
 	esperar(t, llamar(h, "POST", "/login", `{"usuario":`, ""), 400)
 	esperar(t, llamar(h, "GET", "/eventos", "", ""), 200)
 	esperar(t, llamar(h, "GET", "/eventos/25", "", ""), 200)
-	if err := SembrarDemo(db); err != nil {
+	if err := datos.SembrarDemo(db); err != nil {
 		t.Fatal(err)
 	}
 	if err := db.First(&guardada, i.ID).Error; err != nil || guardada.Estado != "cancelada" {
@@ -220,11 +225,11 @@ func TestIntegracionUltimoCupoConcurrente(t *testing.T) {
 	db := baseDePrueba(t)
 	h := servidorDB(db)
 	jug := login(t, h, "ana", "ana-2026")
-	if err := db.Model(&Evento{}).Where("id = ?", 26).Update("cupos", 1).Error; err != nil {
+	if err := db.Model(&modelo.Evento{}).Where("id = ?", 26).Update("cupos", 1).Error; err != nil {
 		t.Fatal(err)
 	}
 	primera := crearReserva(t, h, 26, jug)
-	u := Usuario{ID: 90, Nombre: "Otro jugador", Correo: "concurrencia@example.test", Rol: sesion.RolJugador}
+	u := modelo.Usuario{ID: 90, Nombre: "Otro jugador", Correo: "concurrencia@example.test", Rol: sesion.RolJugador}
 	if err := db.Create(&u).Error; err != nil {
 		t.Fatal(err)
 	}
@@ -233,11 +238,11 @@ func TestIntegracionUltimoCupoConcurrente(t *testing.T) {
 	var wg sync.WaitGroup
 	codigos := make(chan int, 2)
 	for _, c := range []struct {
-		i     Inscripcion
+		i     modelo.Inscripcion
 		token string
 	}{{primera, jug}, {segunda, otro}} {
 		wg.Add(1)
-		go func(i Inscripcion, token string) {
+		go func(i modelo.Inscripcion, token string) {
 			defer wg.Done()
 			codigos <- llamar(h, "PATCH", fmt.Sprintf("/inscripciones/%d/estado", i.ID), `{"estado":"confirmada"}`, token).Code
 		}(c.i, c.token)
@@ -258,7 +263,7 @@ func TestIntegracionUltimoCupoConcurrente(t *testing.T) {
 		t.Fatalf("ultimo cupo: %d confirmadas y %d conflictos", ok, conflicto)
 	}
 	var n int64
-	if err := db.Model(&Inscripcion{}).Where("evento_id = ? AND estado = ?", 26, "confirmada").Count(&n).Error; err != nil || n != 1 {
+	if err := db.Model(&modelo.Inscripcion{}).Where("evento_id = ? AND estado = ?", 26, "confirmada").Count(&n).Error; err != nil || n != 1 {
 		t.Fatal("se sobrevendio el cupo")
 	}
 }
@@ -280,27 +285,28 @@ func TestIntegracionReglasDelNegocio(t *testing.T) {
 	esperar(t, llamar(h, "PATCH", ruta, `{"estado":"pago_por_verificar","banco":"Banco","referencia":"1"}`, jug), 409)
 	esperar(t, llamar(h, "PATCH", ruta, `{"estado":"confirmada"}`, jug), 200)
 	// Identidad ajena: aunque tenga el rol correcto no puede operar otra reserva.
-	otro := Usuario{ID: 90, Nombre: "Otro", Correo: "otro@example.test", Rol: sesion.RolJugador}
+	otro := modelo.Usuario{ID: 90, Nombre: "Otro", Correo: "otro@example.test", Rol: sesion.RolJugador}
 	if err := db.Create(&otro).Error; err != nil {
 		t.Fatal(err)
 	}
 	tokenAjeno, _ := tokensDePrueba.Emitir(sesion.Usuario{ID: 90, Rol: sesion.RolJugador})
+	esperar(t, llamar(h, "GET", fmt.Sprintf("/inscripciones/%d", i.ID), "", tokenAjeno), 403)
 	esperar(t, llamar(h, "PATCH", ruta, `{"estado":"cancelada"}`, tokenAjeno), 403)
 	tokenOrgAjeno, _ := tokensDePrueba.Emitir(sesion.Usuario{ID: 90, Rol: sesion.RolOrganizador})
 	esperar(t, llamar(h, "GET", "/eventos/26/inscripciones", "", tokenOrgAjeno), 403)
 	// Una confirmada solo se cancela con al menos 24 horas.
-	if err := db.Model(&Evento{}).Where("id = ?", 26).Update("inicio", time.Now().Add(time.Hour)).Error; err != nil {
+	if err := db.Model(&modelo.Evento{}).Where("id = ?", 26).Update("inicio", time.Now().Add(time.Hour)).Error; err != nil {
 		t.Fatal(err)
 	}
 	esperar(t, llamar(h, "PATCH", ruta, `{"estado":"cancelada"}`, org), 409)
 	// No se acepta un estado prohibido y no se altera el anterior.
 	esperar(t, llamar(h, "PATCH", ruta, `{"estado":"reservada"}`, org), 422)
-	var actual Inscripcion
+	var actual modelo.Inscripcion
 	db.First(&actual, i.ID)
 	if actual.Estado != "confirmada" {
 		t.Fatal("se modifico pese al rechazo")
 	}
-	// Evento pagado: no se puede saltar el comprobante.
+	// modelo.Evento pagado: no se puede saltar el comprobante.
 	pagada := crearReserva(t, h, 25, jug)
 	rp := fmt.Sprintf("/inscripciones/%d/estado", pagada.ID)
 	esperar(t, llamar(h, "PATCH", rp, `{"estado":"confirmada"}`, jug), 409)
@@ -309,15 +315,15 @@ func TestIntegracionReglasDelNegocio(t *testing.T) {
 	esperar(t, llamar(h, "PATCH", rp, `{"estado":"reservada"}`, org), 200)
 	// Conflicto de cupo al confirmar, no se verifica el pago ni el estado.
 	esperar(t, llamar(h, "PATCH", rp, `{"estado":"pago_por_verificar","banco":"Banco","referencia":"3"}`, jug), 200)
-	db.Model(&Evento{}).Where("id = ?", 25).Update("cupos", 0)
+	db.Model(&modelo.Evento{}).Where("id = ?", 25).Update("cupos", 0)
 	esperar(t, llamar(h, "PATCH", rp, `{"estado":"confirmada"}`, org), 409)
-	var ultimo Pago
+	var ultimo modelo.Pago
 	db.Where("inscripcion_id = ?", pagada.ID).Order("id DESC").First(&ultimo)
 	if ultimo.Verificado {
 		t.Fatal("se verifico un pago sin cupo")
 	}
 	// FK reales: no se guarda una reserva cuyo evento no existe.
-	if err := db.Create(&Inscripcion{EventoID: 99999, JugadorID: otro.ID, Estado: "reservada"}).Error; err == nil {
+	if err := db.Create(&modelo.Inscripcion{EventoID: 99999, JugadorID: otro.ID, Estado: "reservada"}).Error; err == nil {
 		t.Fatal("falta clave foranea")
 	}
 }

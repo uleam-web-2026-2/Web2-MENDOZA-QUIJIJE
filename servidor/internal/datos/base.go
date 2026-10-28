@@ -1,6 +1,7 @@
-package eventosports
+package datos
 
 import (
+	"eventosports/internal/modelo"
 	"eventosports/internal/sesion"
 	"gorm.io/gorm"
 	"time"
@@ -8,7 +9,7 @@ import (
 
 // Migrar crea todas las entidades, incluso las que aun no tienen endpoints.
 func Migrar(db *gorm.DB) error {
-	if err := db.AutoMigrate(&sesion.Usuario{}, &Usuario{}, &Sede{}, &Evento{}, &Inscripcion{}, &Pago{}); err != nil {
+	if err := db.AutoMigrate(&sesion.Usuario{}, &modelo.Usuario{}, &modelo.Sede{}, &modelo.Evento{}, &modelo.Inscripcion{}, &modelo.Pago{}); err != nil {
 		return err
 	}
 	// Una cancelacion permite otra reserva; dos inscripciones activas no.
@@ -28,8 +29,8 @@ func SembrarDemo(db *gorm.DB) error {
 			if err := tx.Where("nombre = ?", nombre).First(&cuenta).Error; err != nil {
 				return err
 			}
-			perfil := Usuario{ID: cuenta.ID, Nombre: cuenta.Nombre, Correo: nombre + "@eventosports.example", Rol: cuenta.Rol}
-			if err := tx.FirstOrCreate(&perfil, Usuario{ID: cuenta.ID}).Error; err != nil {
+			perfil := modelo.Usuario{ID: cuenta.ID, Nombre: cuenta.Nombre, Correo: nombre + "@eventosports.example", Rol: cuenta.Rol}
+			if err := tx.FirstOrCreate(&perfil, modelo.Usuario{ID: cuenta.ID}).Error; err != nil {
 				return err
 			}
 		}
@@ -37,15 +38,15 @@ func SembrarDemo(db *gorm.DB) error {
 		if err := tx.Where("nombre = ?", "luis").First(&organizador).Error; err != nil {
 			return err
 		}
-		sede := Sede{ID: 3, Nombre: "Cancha El Palmar", Ciudad: "Manta", Referencia: "Junto al parque"}
-		if err := tx.FirstOrCreate(&sede, Sede{ID: 3}).Error; err != nil {
+		sede := modelo.Sede{ID: 3, Nombre: "Cancha El Palmar", Ciudad: "Manta", Referencia: "Junto al parque"}
+		if err := tx.FirstOrCreate(&sede, modelo.Sede{ID: 3}).Error; err != nil {
 			return err
 		}
-		for _, e := range []Evento{
+		for _, e := range []modelo.Evento{
 			{ID: 25, Titulo: "Futbol de demostracion", Deporte: "futbol", Nivel: "casual", Inicio: time.Now().AddDate(0, 0, 30), Cupos: 14, Precio: 2.50, SedeID: 3, OrganizadorID: organizador.ID},
 			{ID: 26, Titulo: "Padel gratuito de demostracion", Deporte: "padel", Nivel: "amateur", Inicio: time.Now().AddDate(0, 0, 31), Cupos: 8, Precio: 0, SedeID: 3, OrganizadorID: organizador.ID},
 		} {
-			if err := tx.FirstOrCreate(&e, Evento{ID: e.ID}).Error; err != nil {
+			if err := tx.FirstOrCreate(&e, modelo.Evento{ID: e.ID}).Error; err != nil {
 				return err
 			}
 		}

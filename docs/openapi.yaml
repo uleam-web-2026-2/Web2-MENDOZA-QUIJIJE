@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: EventoSports API
-  version: 0.2.0
-  description: 'API de EventoSports del taller integrador S7: PostgreSQL, login con bcrypt, JWT de una hora y permisos por rol y propiedad. Los GET de eventos y el login son publicos. Las demas operaciones requieren sesion.'
+  version: 0.3.0
+  description: 'EventoSports - Hito 2: API organizada en capas con PostgreSQL y JWT. Incluye las rutas del hito 1, consulta individual de Inscripcion y planes de perfiles, sedes y pagos. Las operaciones con summary terminado en (plan) no estan implementadas; no son parte del recorrido en vivo.'
   contact:
     name: Sebastian Mendoza y Evelin Quijije
 servers:
@@ -17,6 +17,12 @@ tags:
     description: Reservas y cambios de estado
   - name: Sesion
     description: Inicio de sesion JWT
+  - name: Usuarios
+    description: Operaciones futuras del modelo de negocio, sin implementacion en este hito.
+  - name: Sedes
+    description: Operaciones futuras del modelo de negocio, sin implementacion en este hito.
+  - name: Pagos
+    description: Operaciones futuras del modelo de negocio, sin implementacion en este hito.
 paths:
   /eventos:
     get:
@@ -250,6 +256,200 @@ paths:
             schema:
               $ref: '#/components/schemas/Credenciales'
       security: []
+  /inscripciones/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: Identificador del recurso
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    get:
+      operationId: verInscripcion
+      summary: Consulta una inscripcion propia o de un evento propio
+      tags:
+        - Inscripciones
+      responses:
+        '200':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inscripcion'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /usuarios:
+    get:
+      operationId: listarUsuarios
+      summary: Lista usuarios (plan)
+      tags:
+        - Usuarios
+      responses:
+        '200':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Usuario'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      operationId: crearUsuario
+      summary: Crea usuario del negocio (plan)
+      tags:
+        - Usuarios
+      responses:
+        '201':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioNuevo'
+  /sedes:
+    get:
+      operationId: listarSedes
+      summary: Lista sedes (plan)
+      tags:
+        - Sedes
+      responses:
+        '200':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sede'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      operationId: crearSede
+      summary: Crea sede del negocio (plan)
+      tags:
+        - Sedes
+      responses:
+        '201':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sede'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SedeNueva'
+  /inscripciones/{id}/pagos:
+    parameters:
+      - name: id
+        in: path
+        description: Identificador del recurso
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    get:
+      operationId: listarPagos
+      summary: Lista el historial de comprobantes (plan)
+      tags:
+        - Pagos
+      responses:
+        '200':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pago'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      operationId: crearPago
+      summary: Registra un comprobante independiente (plan)
+      tags:
+        - Pagos
+      responses:
+        '201':
+          description: Operacion realizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pago'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '500':
+          $ref: '#/components/responses/Error500'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PagoNuevo'
 components:
   securitySchemes:
     sesion:
@@ -512,6 +712,55 @@ components:
               $ref: '#/components/schemas/Pago'
           required:
             - jugador
+    UsuarioNuevo:
+      type: object
+      properties:
+        nombre:
+          type: string
+        correo:
+          type: string
+          format: email
+        rol:
+          type: string
+          enum:
+            - jugador
+            - organizador
+        ruc:
+          type: string
+        whatsapp:
+          type: string
+      required:
+        - nombre
+        - correo
+        - rol
+    SedeNueva:
+      type: object
+      properties:
+        nombre:
+          type: string
+        ciudad:
+          type: string
+        referencia:
+          type: string
+        latitud:
+          type: number
+        longitud:
+          type: number
+      required:
+        - nombre
+        - ciudad
+        - referencia
+    PagoNuevo:
+      type: object
+      required:
+        - banco
+        - referencia
+      properties:
+        banco:
+          type: string
+        referencia:
+          type: string
+      description: El monto se obtiene del evento relacionado con la inscripcion.
   responses:
     Error400:
       description: ID o JSON mal formado

@@ -2,7 +2,9 @@ package main
 
 import (
 	"eventosports/internal/configuracion"
+	"eventosports/internal/datos"
 	"eventosports/internal/eventosports"
+	"eventosports/internal/negocio"
 	"eventosports/internal/sesion"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/driver/postgres"
@@ -27,16 +29,18 @@ func main() {
 		log.Fatal(err)
 	}
 	defer sqlDB.Close()
-	if err := eventosports.Migrar(db); err != nil {
+	if err := datos.Migrar(db); err != nil {
 		log.Fatal("no se pudieron crear las tablas: ", err)
 	}
 	if c.Demo {
-		if err := eventosports.SembrarDemo(db); err != nil {
+		if err := datos.SembrarDemo(db); err != nil {
 			log.Fatal("no se pudieron preparar los ejemplos: ", err)
 		}
 	}
 	r := chi.NewRouter()
-	(&eventosports.Manejador{DB: db}).Rutas(r, sesion.NuevosTokens(c.Secreto))
+	tokens := sesion.NuevosTokens(c.Secreto)
+	servicio := &negocio.Servicio{Almacen: &datos.AlmacenGORM{DB: db}}
+	(&eventosports.Manejador{Servicio: servicio, Sesion: &sesion.Manejador{DB: db, Tokens: tokens}}).Rutas(r, tokens)
 	servidor := &http.Server{Addr: ":" + c.Puerto, Handler: r, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 15 * time.Second}
 	log.Printf("EventoSports listo en http://localhost:%s", c.Puerto)
 	log.Fatal(servidor.ListenAndServe())
