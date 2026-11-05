@@ -42,9 +42,9 @@ type CrearEvento struct {
 	SedeID  uint      `json:"sede_id"`
 }
 type CambioEstado struct {
-	Estado     string `json:"estado"`
-	Banco      string `json:"banco"`
-	Referencia string `json:"referencia"`
+	Estado     string
+	Banco      string
+	Referencia string
 }
 type EventoVista struct {
 	modelo.Evento

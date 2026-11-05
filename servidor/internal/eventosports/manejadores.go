@@ -74,7 +74,11 @@ func (m *Manejador) listarEventos(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	v, err := m.Servicio.ListarEventos(r.Context(), negocio.Filtro{Deporte: q.Get("deporte"), Nivel: q.Get("nivel"), Ciudad: q.Get("ciudad")})
 	if !resultado(w, err) {
-		responder(w, 200, v)
+		lista := make([]eventoRespuesta, 0, len(v))
+		for _, evento := range v {
+			lista = append(lista, nuevoEventoRespuesta(evento))
+		}
+		responder(w, 200, lista)
 	}
 }
 func (m *Manejador) verEvento(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +88,7 @@ func (m *Manejador) verEvento(w http.ResponseWriter, r *http.Request) {
 	}
 	v, err := m.Servicio.VerEvento(r.Context(), id, actor(r))
 	if !resultado(w, err) {
-		responder(w, 200, v)
+		responder(w, 200, nuevoEventoRespuesta(v))
 	}
 }
 func (m *Manejador) crearEvento(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +98,7 @@ func (m *Manejador) crearEvento(w http.ResponseWriter, r *http.Request) {
 	}
 	v, err := m.Servicio.CrearEvento(r.Context(), c, actor(r))
 	if !resultado(w, err) {
-		responder(w, 201, v)
+		responder(w, 201, nuevoEventoRespuesta(v))
 	}
 }
 func (m *Manejador) crearInscripcion(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +108,7 @@ func (m *Manejador) crearInscripcion(w http.ResponseWriter, r *http.Request) {
 	}
 	v, err := m.Servicio.CrearInscripcion(r.Context(), id, actor(r))
 	if !resultado(w, err) {
-		responder(w, 201, v)
+		responder(w, 201, nuevaInscripcionRespuesta(v))
 	}
 }
 func (m *Manejador) verInscripcion(w http.ResponseWriter, r *http.Request) {
@@ -114,7 +118,7 @@ func (m *Manejador) verInscripcion(w http.ResponseWriter, r *http.Request) {
 	}
 	v, err := m.Servicio.VerInscripcion(r.Context(), id, actor(r))
 	if !resultado(w, err) {
-		responder(w, 200, v)
+		responder(w, 200, nuevaInscripcionRespuesta(v))
 	}
 }
 func (m *Manejador) listarInscripciones(w http.ResponseWriter, r *http.Request) {
@@ -124,6 +128,13 @@ func (m *Manejador) listarInscripciones(w http.ResponseWriter, r *http.Request) 
 	}
 	v, err := m.Servicio.ListarInscripciones(r.Context(), id, actor(r))
 	if !resultado(w, err) {
-		responder(w, 200, v)
+		lista := make([]inscripcionVistaRespuesta, 0, len(v))
+		for _, i := range v {
+			lista = append(lista, inscripcionVistaRespuesta{
+				inscripcionRespuesta: nuevaInscripcionRespuesta(i.Inscripcion),
+				Jugador:              i.Jugador, UltimoPago: i.UltimoPago,
+			})
+		}
+		responder(w, 200, lista)
 	}
 }

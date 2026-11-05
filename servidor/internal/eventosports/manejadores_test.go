@@ -160,11 +160,11 @@ func crearReserva(t *testing.T, h http.Handler, event uint, token string) modelo
 	t.Helper()
 	r := llamar(h, "POST", fmt.Sprintf("/eventos/%d/inscripciones", event), "", token)
 	esperar(t, r, 201)
-	var i modelo.Inscripcion
+	var i inscripcionRespuesta
 	if err := json.Unmarshal(r.Body.Bytes(), &i); err != nil {
 		t.Fatal(err)
 	}
-	return i
+	return modelo.Inscripcion{ID: i.ID, EventoID: i.EventoID, JugadorID: i.JugadorID, Estado: i.Estado, Creado: i.Creado}
 }
 
 func TestIntegracionSeisPeticionesYPersistencia(t *testing.T) {
@@ -178,7 +178,7 @@ func TestIntegracionSeisPeticionesYPersistencia(t *testing.T) {
 	i := crearReserva(t, h, 25, jug)
 	detalle := llamar(h, "GET", "/eventos/25", "", jug)
 	esperar(t, detalle, 200)
-	var personal negocio.EventoVista
+	var personal eventoRespuesta
 	if err := json.Unmarshal(detalle.Body.Bytes(), &personal); err != nil || personal.MiInscripcion == nil || personal.MiInscripcion.ID != i.ID {
 		t.Fatal("el detalle autenticado debe conservar la inscripcion del jugador")
 	}

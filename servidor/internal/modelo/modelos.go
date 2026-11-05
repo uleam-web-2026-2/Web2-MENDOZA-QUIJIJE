@@ -37,13 +37,13 @@ type Evento struct {
 }
 
 type Inscripcion struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	EventoID  uint      `gorm:"not null;index" json:"evento_id"`
-	JugadorID uint      `gorm:"not null;index" json:"jugador_id"`
-	Estado    string    `gorm:"not null;default:reservada" json:"estado"` // reservada | pago_por_verificar | confirmada | cancelada
-	Creado    time.Time `gorm:"autoCreateTime" json:"creado"`
-	Evento    Evento    `gorm:"foreignKey:EventoID" json:"-"`
-	Jugador   Usuario   `gorm:"foreignKey:JugadorID" json:"-"`
+	ID        uint      `gorm:"primaryKey"`
+	EventoID  uint      `gorm:"not null;index"`
+	JugadorID uint      `gorm:"not null;index"`
+	Estado    string    `gorm:"not null;default:reservada"` // reservada | pago_por_verificar | confirmada | cancelada
+	Creado    time.Time `gorm:"autoCreateTime"`
+	Evento    Evento    `gorm:"foreignKey:EventoID"`
+	Jugador   Usuario   `gorm:"foreignKey:JugadorID"`
 }
 
 type Pago struct {

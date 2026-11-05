@@ -11,12 +11,12 @@ func (m *Manejador) cambiarEstado(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	var c negocio.CambioEstado
+	var c cambioEstadoPeticion
 	if !leerJSON(w, r, &c) {
 		return
 	}
-	i, err := m.Servicio.CambiarEstado(r.Context(), id, c, actor(r))
+	i, err := m.Servicio.CambiarEstado(r.Context(), id, negocio.CambioEstado(c), actor(r))
 	if !resultado(w, err) {
-		responder(w, 200, i)
+		responder(w, 200, nuevaInscripcionRespuesta(i))
 	}
 }
