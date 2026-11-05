@@ -1,7 +1,7 @@
 -- name: ListDeportes :many
 SELECT * FROM deportes
 ORDER BY id;
-
+  
 -- name: GetEvento :one
 SELECT * FROM eventos
 WHERE id = $1 LIMIT 1;

@@ -15,7 +15,7 @@ $rng.Dispose()
 $contenido = @"
 PORT=8080
 POSTGRES_PASSWORD=$claveBD
-DATABASE_URL=postgres://eventosports:$claveBD@localhost:5433/eventosports?sslmode=disable
+DATABASE_URL=postgres://eventosports:$claveBD@localhost:5432/eventosports?sslmode=disable
 JWT_SECRET=$secretoJWT
 DEMO_SEED=true
 "@

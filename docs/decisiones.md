@@ -60,6 +60,14 @@ La petición 0 de Bruno hace la preparación antes del turno: inicia ambas sesio
 
 Los IDs y los tokens se conservan únicamente en variables de ejecución `bru.setVar`. No se escriben JWT en los archivos `.bru` ni en el entorno versionado. La petición 2 vuelve a iniciar sesión en vivo y obtiene el token usado en 3, 5 y 6. Las peticiones 4 y 5 comparten ID y cuerpo. La 6 usa otro registro ya cancelado. Ejecutar de nuevo la 0 prepara datos nuevos sin borrar datos anteriores.
 
+## Semana 10 · PostgreSQL sin Docker
+
+Usamos PostgreSQL 16 instalado en el equipo, en lugar del contenedor del hito 2, porque preferimos no depender de Docker para trabajar. El motor es el mismo, así que sqlc sigue siendo posible. La API se conecta con su propio usuario, `eventosports`, dueño de su base, y no con `postgres`, que tiene permiso sobre todo.
+
+`servidor/compose.yaml` no se borró: por ahora no se usa, y el taller deja Docker para la semana 11.
+
 ## Uso de IA
 
 La separación en capas, las pruebas, el contrato, los scripts, la colección y esta documentación se prepararon con asistencia de Codex. Los archivos de tokens y guardia provienen del material docente. La pareja debe revisar las decisiones y explicar el código con sus propias razones. No se fabricaron commits de ningún integrante ni se hizo push automáticamente.
+
+En la semana 10, la preparación de PostgreSQL local y la línea de base se hicieron con asistencia de Claude Code.

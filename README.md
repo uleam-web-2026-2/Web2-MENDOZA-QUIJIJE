@@ -1,4 +1,4 @@
-# EventoSports · Hito 2
+# EventoSports · Hito 2 y taller 10
 
 Sebastián Mendoza y Evelin Quijije · Grupo E · Aplicaciones Web II A.
 
@@ -6,18 +6,37 @@ La entrega técnica reúne PostgreSQL, autenticación JWT, permisos, estados y p
 
 El enunciado oficial pide una demostración en vivo de cinco minutos y especifica que **no hay diapositivas**. Si un integrante falta, la persona presente realiza las cinco demostraciones y responde las dos preguntas.
 
+## Taller 10
+
+Rama `taller10`. El avance se anota aquí a medida que se hace, y las evidencias van en `docs/taller10/`.
+
+| Parte | Estado |
+|---|---|
+| Fase 0: rama, sqlc 1.31.1 y línea de base | Hecha. La columna «Antes» de `docs/taller10/peticiones.md` se midió el 5 de noviembre de 2026 |
+| 1. Repositorio como interfaz | Ya estaba desde la semana 8: el servicio depende de `Almacen` y no importa GORM |
+| 2. DTO | Pendiente |
+| 3. sqlc en dos consultas | Empezado por Evelin en la raíz (`sqlc.yaml`, `db/`, `repository/`). Falta aplicarlo a Inscripción en `servidor/` |
+| 4. Nada se rompe | Pendiente |
+| 5. API estabilizada | Pendiente |
+| 6. Transacciones | Pendiente |
+
+Línea de base comprobada: `go test ./... -count=1` pasa con las pruebas de integración ejecutadas contra la base, y Bruno da 401, 200, 200, 403, 200 y 422.
+
 ## Inicio rápido
 
-Desde la raíz, en una terminal:
+Requiere PostgreSQL 16 instalado en el equipo. Desde la raíz, en una terminal de PowerShell:
 
 ```powershell
 cd servidor
 powershell -ExecutionPolicy Bypass -File scripts/preparar-entorno.ps1
-docker compose up -d --wait db
+$clave = ((Select-String -LiteralPath .env -Pattern '^POSTGRES_PASSWORD=').Line -split '=',2)[1]
+& 'C:\Program Files\PostgreSQL\16\bin\psql.exe' -U postgres -h localhost -d postgres -c "CREATE ROLE eventosports LOGIN PASSWORD '$clave'" -c "CREATE DATABASE eventosports OWNER eventosports"
 go run .
 ```
 
-Se conserva el único contenedor PostgreSQL de EventoSports, en `localhost:5433`. No se agregaron servicios nuevos para el Hito 2. El servidor corre en `http://localhost:8080`. `.env` guarda la conexión y el secreto JWT local y está excluido de Git.
+Las líneas de `$clave` y `psql` solo hacen falta la primera vez, y piden la clave del usuario `postgres`. Crean el usuario y la base que usa la API, con la clave aleatoria que el script guardó en `.env`.
+
+Desde el taller 10, PostgreSQL corre en el equipo, en `localhost:5432`, sin Docker. `servidor/compose.yaml` queda de la entrega anterior y no hace falta. El servidor corre en `http://localhost:8080`. `.env` guarda la conexión y el secreto JWT local y está excluido de Git.
 
 Con `DEMO_SEED=true`: Ana (`ana` / `ana-2026`) es jugador y Luis (`luis` / `luis-2026`) es organizador. Son credenciales inventadas de la demostración; las contraseñas se guardan con bcrypt.
 
