@@ -97,4 +97,4 @@ Agregamos la tabla `pagos` al esquema que lee sqlc y la consulta `CrearPago` a `
 
 ### D6 · Archivos
 
-Se tocaron `servidor/db/schema.sql`, `servidor/db/consultas.sql`, el código generado en `servidor/internal/datos/filas/` y `servidor/internal/datos/almacen_sqlc.go`. Las pruebas están en `servidor/internal/eventosports/transaccion_test.go` y `servidor/internal/negocio/servicio_test.go`; su salida se guarda en `docs/taller10/error_forzado.txt`. El servicio, sus reglas, los manejadores, las rutas y `main.go` quedaron iguales en esta fase.
+Se tocaron `servidor/db/schema.sql`, `servidor/db/consultas.sql`, el código generado en `servidor/internal/datos/filas/` y `servidor/internal/datos/almacen_sqlc.go`. Las pruebas están en `servidor/internal/eventosports/transaccion_test.go` y `servidor/internal/negocio/servicio_test.go`; su salida se guarda en `docs/taller10/error_forzado.txt`. Se actualizó este archivo de decisiones y `README.md` para explicar el resultado. El servicio, sus reglas, los manejadores, las rutas y `main.go` quedaron iguales en esta fase.

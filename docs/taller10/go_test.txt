@@ -2,7 +2,7 @@
 ?   	eventosports/internal/configuracion	[no test files]
 ?   	eventosports/internal/datos	[no test files]
 ?   	eventosports/internal/datos/filas	[no test files]
-ok  	eventosports/internal/eventosports	(cached)
+ok  	eventosports/internal/eventosports	2.563s
 ?   	eventosports/internal/modelo	[no test files]
-ok  	eventosports/internal/negocio	(cached)
+ok  	eventosports/internal/negocio	1.226s
 ?   	eventosports/internal/sesion	[no test files]

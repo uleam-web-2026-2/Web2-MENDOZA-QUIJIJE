@@ -3,7 +3,7 @@ CREATE TABLE inscripciones (
     evento_id bigint NOT NULL,
     jugador_id bigint NOT NULL,
     estado text NOT NULL DEFAULT 'reservada',
-    creado timestamptz
+    creado timestamptz NOT NULL
 );
 
 CREATE TABLE pagos (

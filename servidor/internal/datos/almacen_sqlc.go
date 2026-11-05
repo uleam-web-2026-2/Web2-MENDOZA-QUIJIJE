@@ -48,7 +48,7 @@ func (q *consultaSQLC) Inscripcion(id uint) (modelo.Inscripcion, error) {
 	}
 	return modelo.Inscripcion{
 		ID: uint(f.ID), EventoID: uint(f.EventoID), JugadorID: uint(f.JugadorID),
-		Estado: f.Estado, Creado: f.Creado.Time,
+		Estado: f.Estado, Creado: f.Creado,
 	}, nil
 }
 

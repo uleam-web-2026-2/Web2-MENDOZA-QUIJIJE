@@ -41,7 +41,7 @@ type Inscripcion struct {
 	EventoID  uint      `gorm:"not null;index"`
 	JugadorID uint      `gorm:"not null;index"`
 	Estado    string    `gorm:"not null;default:reservada"` // reservada | pago_por_verificar | confirmada | cancelada
-	Creado    time.Time `gorm:"autoCreateTime"`
+	Creado    time.Time `gorm:"not null;autoCreateTime"`
 	Evento    Evento    `gorm:"foreignKey:EventoID"`
 	Jugador   Usuario   `gorm:"foreignKey:JugadorID"`
 }
