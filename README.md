@@ -14,13 +14,13 @@ Rama `taller10`. El avance se anota aquí a medida que se hace, y las evidencias
 |---|---|
 | Fase 0: rama, sqlc 1.31.1 y línea de base | Hecha. La columna «Antes» de `docs/taller10/peticiones.md` se midió el 5 de noviembre de 2026 |
 | 1. Repositorio como interfaz | Ya estaba desde la semana 8: el servicio depende de `Almacen` y no importa GORM |
-| 2. DTO | Pendiente |
-| 3. sqlc en dos consultas | Empezado por Evelin en la raíz (`sqlc.yaml`, `db/`, `repository/`). Falta aplicarlo a Inscripción en `servidor/` |
-| 4. Nada se rompe | Pendiente |
-| 5. API estabilizada | Pendiente |
-| 6. Transacciones | Pendiente |
+| 2. DTO | Hecha. `Inscripcion` sale por DTO, conserva los nombres JSON y el servidor asigna el ID y el estado inicial. Evidencias en `docs/taller10/comprobacion/` |
+| 3. sqlc en dos consultas | Hecha en `servidor/`: busca la inscripción por ID y guarda su estado; el resto de operaciones continúa en GORM. Evidencia en `docs/taller10/prueba/` |
+| 4. Nada se rompe | Hecha. Las seis respuestas coinciden antes y después; `docs/taller10/go_test.txt` no contiene `FAIL` |
+| 5. API estabilizada | Contrato validado en `docs/taller10/redocly.txt`, entidades y rutas planificadas documentadas, y `.env.example` completo. Falta comprobar el arranque desde una copia limpia de esa plantilla |
+| 6. Transacciones | Hecha. La prueba fuerza un fallo al guardar el estado y verifica la reversión del pago con GORM y sqlc. Evidencia en `docs/taller10/error_forzado.txt` y decisión en `docs/decisiones.md` |
 
-Línea de base comprobada: `go test ./... -count=1` pasa con las pruebas de integración ejecutadas contra la base, y Bruno da 401, 200, 200, 403, 200 y 422.
+Línea de base y comprobación posterior: Bruno da 401, 200, 200, 403, 200 y 422 en ambas ejecuciones. `go test ./... -count=1` pasa con las pruebas de integración contra PostgreSQL.
 
 ## Inicio rápido
 
@@ -64,7 +64,8 @@ También se puede abrir `docs/hito2_bruno/` en el cliente de Bruno, seleccionar 
 | `docs/hito2_hoja.md` y `docs/hito2_hoja.html` | Hoja breve y versión imprimible en una página A4 |
 | `docs/hito2_bruno/` | Siete peticiones 0–6, entorno Local y comprobaciones |
 | `docs/hito2_capturas/` | Imágenes del informe de respuestas reales y pruebas; reporte JSON sin JWT |
-| `docs/decisiones.md` | Sección «Semana 8 · estructura», alcance y decisiones |
+| `docs/decisiones.md` | Decisiones de la semana 8 y diseño de transacciones de la semana 10 |
+| `docs/taller10/` | Comparación antes y después, salidas de pruebas, validación Redocly y fallo forzado de la fase 6 |
 | `docs/hito2_guion.md` | Preparación, cinco minutos y seis preguntas para practicar |
 | `docs/README_taller_s7.md` | Explicación histórica del taller S7, antes de las capas |
 
@@ -91,10 +92,10 @@ Se añadió `GET /inscripciones/{id}` para consultar individualmente la entidad 
 
 ## Antes de entregar
 
-La parte técnica está preparada para ensayar. Todavía deben revisar y explicar el código, ensayar los cinco minutos con la computadora de la demostración, crear los commits propios de ambos integrantes y comprobar el push al repositorio de la organización antes del cierre. No se hicieron commits ni push automáticamente.
+La parte técnica está preparada para ensayar. Todavía deben revisar y explicar el código, ensayar los cinco minutos con la computadora de la demostración y comprobar que cada fase y sus evidencias estén publicadas en la rama `taller10` antes del cierre.
 
 Para Web II A, según el enunciado: cierre **29 de octubre de 2026 a las 23:59** y demostración **30 de octubre a las 09:00**, según el orden del docente. Una ejecución rápida del CLI no reemplaza el ensayo oral de ambos integrantes.
 
 ## Uso de IA
 
-La integración S7, las capas, las pruebas y los materiales de preparación se realizaron con asistencia de Codex. El código de tokens y guardia procede del material docente. La declaración y el detalle de decisiones están en `docs/decisiones.md`.
+La integración S7, las capas, las pruebas y los materiales de preparación se realizaron con asistencia de Codex y Claude Code. El código de tokens y guardia procede del material docente. La declaración y el detalle de decisiones están en `docs/decisiones.md`.

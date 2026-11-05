@@ -7,6 +7,7 @@ package filas
 
 import (
 	"context"
+	"time"
 )
 
 const buscarInscripcion = `-- name: BuscarInscripcion :one
@@ -26,6 +27,36 @@ func (q *Queries) BuscarInscripcion(ctx context.Context, id int64) (Inscripcione
 		&i.Creado,
 	)
 	return i, err
+}
+
+const crearPago = `-- name: CrearPago :one
+INSERT INTO pagos (inscripcion_id, monto, banco, referencia, verificado, creado)
+VALUES ($1, $2::double precision,
+        $3, $4, $5, $6)
+RETURNING id
+`
+
+type CrearPagoParams struct {
+	InscripcionID int64
+	Monto         float64
+	Banco         string
+	Referencia    string
+	Verificado    bool
+	Creado        time.Time
+}
+
+func (q *Queries) CrearPago(ctx context.Context, arg CrearPagoParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, crearPago,
+		arg.InscripcionID,
+		arg.Monto,
+		arg.Banco,
+		arg.Referencia,
+		arg.Verificado,
+		arg.Creado,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
 const guardarEstadoInscripcion = `-- name: GuardarEstadoInscripcion :execrows

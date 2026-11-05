@@ -71,3 +71,30 @@ Usamos PostgreSQL 16 instalado en el equipo, en lugar del contenedor del hito 2,
 La separación en capas, las pruebas, el contrato, los scripts, la colección y esta documentación se prepararon con asistencia de Codex. Los archivos de tokens y guardia provienen del material docente. La pareja debe revisar las decisiones y explicar el código con sus propias razones. No se fabricaron commits de ningún integrante ni se hizo push automáticamente.
 
 En la semana 10, la preparación de PostgreSQL local y la línea de base se hicieron con asistencia de Claude Code.
+
+## Semana 10 · transacciones
+
+### D1 · El caso
+
+Cuando un jugador envía el comprobante de una inscripción reservada, el servicio crea una fila en `pagos` y cambia la inscripción a `pago_por_verificar`. Si falla el segundo paso, quedaría un pago asociado a una inscripción todavía reservada. Ambas escrituras deben confirmarse o deshacerse juntas.
+
+### D2 · Opciones que consideramos
+
+1. Mantener `Almacen.Transaccion(ctx, función)` en la interfaz del negocio. Cada adaptador entrega una `Operacion` que usa una única transacción. El servicio puede probarse con un almacén falso y no importa GORM ni `database/sql`. El adaptador de sqlc tiene que asegurar que sus consultas se ejecuten en la conexión de esa transacción.
+2. Llamar `CrearPago` y `GuardarEstado` por separado desde el servicio. Es sencillo de escribir, pero si la segunda llamada falla, la primera ya quedó confirmada y se rompe la atomicidad.
+
+### D3 · La que elegimos y por qué
+
+Elegimos la primera opción. El servicio ya coordinaba los bloqueos del evento y de la inscripción dentro de `Almacen.Transaccion`, necesarios para no sobrepasar el último cupo. Conservamos ese orden y la interfaz. En el adaptador GORM, las dos escrituras usan GORM. En `AlmacenSQLC`, `CrearPago` y `GuardarEstado` usan consultas generadas por sqlc sobre la conexión de la transacción activa. Una prueba contra PostgreSQL impide el cambio de estado después del alta del pago y comprueba que no persiste ninguna de las dos escrituras con ambos adaptadores.
+
+### D4 · La que descartamos y por qué
+
+Descartamos las llamadas independientes. En EventoSports permitirían que un comprobante quedara guardado mientras su inscripción siguiera en `reservada`, lo que confundiría la revisión del organizador. Compensar el fallo con otro `DELETE` podría fallar también y no preservaría los bloqueos usados para controlar los cupos.
+
+### D5 · Con sqlc
+
+Agregamos la tabla `pagos` al esquema que lee sqlc y la consulta `CrearPago` a `consultas.sql`. Regeneramos `filas` con sqlc. `consultaSQLC` implementa `CrearPago` y ya implementaba `GuardarEstado`. Ambas funciones generadas reciben el `ConnPool` de la transacción que abre el adaptador, por lo que comparten la misma transacción de PostgreSQL con las lecturas y los bloqueos existentes. La interfaz y el servicio permanecieron iguales. La documentación de sqlc muestra `WithTx` para asociar consultas a `*sql.Tx`; aquí se usa el `DBTX` generado con la conexión transaccional que GORM ya proporciona, porque este adaptador también conserva operaciones de GORM.
+
+### D6 · Archivos
+
+Se tocaron `servidor/db/schema.sql`, `servidor/db/consultas.sql`, el código generado en `servidor/internal/datos/filas/` y `servidor/internal/datos/almacen_sqlc.go`. Las pruebas están en `servidor/internal/eventosports/transaccion_test.go` y `servidor/internal/negocio/servicio_test.go`; su salida se guarda en `docs/taller10/error_forzado.txt`. El servicio, sus reglas, los manejadores, las rutas y `main.go` quedaron iguales en esta fase.

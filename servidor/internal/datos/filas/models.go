@@ -6,6 +6,7 @@ package filas
 
 import (
 	"database/sql"
+	"time"
 )
 
 type Inscripcione struct {
@@ -14,4 +15,14 @@ type Inscripcione struct {
 	JugadorID int64
 	Estado    string
 	Creado    sql.NullTime
+}
+
+type Pago struct {
+	ID            int64
+	InscripcionID int64
+	Monto         string
+	Banco         string
+	Referencia    string
+	Verificado    bool
+	Creado        time.Time
 }

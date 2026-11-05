@@ -1,0 +1,8 @@
+=== RUN   TestPagoYEstadoSeReviertenSiFallaElEstado
+=== RUN   TestPagoYEstadoSeReviertenSiFallaElEstado/GORM
+=== RUN   TestPagoYEstadoSeReviertenSiFallaElEstado/sqlc
+--- PASS: TestPagoYEstadoSeReviertenSiFallaElEstado (0.83s)
+    --- PASS: TestPagoYEstadoSeReviertenSiFallaElEstado/GORM (0.51s)
+    --- PASS: TestPagoYEstadoSeReviertenSiFallaElEstado/sqlc (0.32s)
+PASS
+ok  	eventosports/internal/eventosports	1.115s

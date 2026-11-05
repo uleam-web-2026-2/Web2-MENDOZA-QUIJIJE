@@ -61,3 +61,16 @@ func (q *consultaSQLC) GuardarEstado(i modelo.Inscripcion) error {
 	}
 	return err
 }
+
+func (q *consultaSQLC) CrearPago(p *modelo.Pago) error {
+	id, err := q.q.CrearPago(q.ctx, filas.CrearPagoParams{
+		InscripcionID: int64(p.InscripcionID), Monto: p.Monto,
+		Banco: p.Banco, Referencia: p.Referencia,
+		Verificado: p.Verificado, Creado: p.Creado,
+	})
+	if err != nil {
+		return err
+	}
+	p.ID = uint(id)
+	return nil
+}
