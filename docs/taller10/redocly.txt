@@ -1,0 +1,5 @@
+[90mvalidating docs\openapi.yaml...
+[39m[90mdocs\openapi.yaml: validated in 33ms
+
+[39m[32mWoohoo! Your API description is valid. 🎉
+[39m

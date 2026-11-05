@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
-	// Cadena de conexión a PostgreSQL (puedes ajustarla según tus credenciales locales)
-	dsn := os.Getenv("DB_DSN")
+	// La conexión se configura con la misma variable que usa el servidor.
+	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		dsn = "postgres://postgres:1234567@postgres:5432/eventosports?sslmode=disable"
+		log.Fatal("falta DATABASE_URL")
 	}
 
 	// 1. Inicializar la conexión a la base de datos
