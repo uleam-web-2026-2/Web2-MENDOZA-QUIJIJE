@@ -39,7 +39,8 @@ func main() {
 	}
 	r := chi.NewRouter()
 	tokens := sesion.NuevosTokens(c.Secreto)
-	servicio := &negocio.Servicio{Almacen: &datos.AlmacenGORM{DB: db}}
+	almacen := &datos.AlmacenSQLC{AlmacenGORM: &datos.AlmacenGORM{DB: db}}
+	servicio := &negocio.Servicio{Almacen: almacen}
 	(&eventosports.Manejador{Servicio: servicio, Sesion: &sesion.Manejador{DB: db, Tokens: tokens}}).Rutas(r, tokens)
 	servidor := &http.Server{Addr: ":" + c.Puerto, Handler: r, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 15 * time.Second}
 	log.Printf("EventoSports listo en http://localhost:%s", c.Puerto)
