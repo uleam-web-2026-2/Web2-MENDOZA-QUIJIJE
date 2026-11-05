@@ -1,0 +1,8 @@
+?   	eventosports	[no test files]
+?   	eventosports/internal/configuracion	[no test files]
+?   	eventosports/internal/datos	[no test files]
+?   	eventosports/internal/datos/filas	[no test files]
+ok  	eventosports/internal/eventosports	(cached)
+?   	eventosports/internal/modelo	[no test files]
+ok  	eventosports/internal/negocio	(cached)
+?   	eventosports/internal/sesion	[no test files]
