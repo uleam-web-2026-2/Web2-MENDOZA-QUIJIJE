@@ -1,0 +1,28 @@
+meta {
+  name: 4 - Jugador no verifica pagos
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/inscripciones/{{inscripcionId}}/estado
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{tokenJugador}}
+}
+
+body:json {
+  {
+    "estado": "confirmada"
+  }
+}
+
+tests {
+  test("Respuesta 403", function () {
+    expect(res.status).to.equal(403);
+  });
+}

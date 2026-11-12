@@ -1,0 +1,17 @@
+meta {
+  name: 1 - Ruta protegida sin token
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/eventos/{{eventoId}}/inscripciones
+  body: none
+  auth: none
+}
+
+tests {
+  test("Respuesta 401", function () {
+    expect(res.status).to.equal(401);
+  });
+}

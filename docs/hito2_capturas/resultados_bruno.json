@@ -1,0 +1,440 @@
+{
+  "fecha": "2026-10-26T21:27:02-05:00",
+  "origen": "Bruno CLI 4.3.0 - ejecucion real contra localhost:8080",
+  "nota": "JWT y Authorization ocultos al exportar. Los cuerpos y codigos restantes provienen de la respuesta real.",
+  "ejecucion": [
+    {
+      "iterationIndex": 0,
+      "results": [
+        {
+          "test": {
+            "filename": "0_preparar.bru"
+          },
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/eventos/31/inscripciones",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "User-Agent": "bruno-runtime/4.3.0",
+              "Accept-Encoding": "gzip, compress, deflate, br",
+              "Host": "localhost:8080",
+              "Connection": "keep-alive",
+              "Content-Length": "0",
+              "content-type": null,
+              "Authorization": "[JWT oculto en el respaldo]"
+            }
+          },
+          "response": {
+            "status": 201,
+            "statusText": "Created",
+            "headers": {
+              "content-type": "application/json; charset=utf-8",
+              "date": "Tue, 27 Oct 2026 02:20:49 GMT",
+              "content-length": "105"
+            },
+            "data": {
+              "id": 6,
+              "evento_id": 31,
+              "jugador_id": 1,
+              "estado": "reservada",
+              "creado": "2026-10-26T21:20:49.3867229-05:00"
+            },
+            "url": "http://localhost/eventos/31/inscripciones",
+            "responseTime": 8,
+            "duration": 8,
+            "size": 105
+          },
+          "error": null,
+          "status": "pass",
+          "assertionResults": [],
+          "testResults": [
+            {
+              "description": "Respuesta 201",
+              "status": "pass",
+              "uid": "cO2A6jOmMLb28T7PvnqPq"
+            }
+          ],
+          "preRequestTestResults": [],
+          "postResponseTestResults": [],
+          "shouldStopRunnerExecution": false,
+          "runDuration": 0.4950674,
+          "name": "0 - Preparar registros nuevos",
+          "suitename": "C:\\Users\\Lans_06\\Documents\\GitHub\\Web2-MENDOZA-QUIJIJE\\docs\\hito2_bruno\\0_preparar",
+          "path": "0_preparar",
+          "iterationIndex": 0
+        },
+        {
+          "test": {
+            "filename": "1_sin_token.bru"
+          },
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/eventos/31/inscripciones",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "User-Agent": "bruno-runtime/4.3.0",
+              "Accept-Encoding": "gzip, compress, deflate, br",
+              "Host": "localhost:8080",
+              "Connection": "keep-alive",
+              "content-type": null
+            }
+          },
+          "response": {
+            "status": 401,
+            "statusText": "Unauthorized",
+            "headers": {
+              "content-type": "application/json; charset=utf-8",
+              "date": "Tue, 27 Oct 2026 02:20:49 GMT",
+              "content-length": "58"
+            },
+            "data": {
+              "error": "falta el token: inicie sesión en POST /login"
+            },
+            "url": "http://localhost/eventos/31/inscripciones",
+            "responseTime": 2,
+            "duration": 2,
+            "size": 58
+          },
+          "error": null,
+          "status": "pass",
+          "assertionResults": [],
+          "testResults": [
+            {
+              "description": "Respuesta 401",
+              "status": "pass",
+              "uid": "6WVYE7h2tcNY9Hdm8BZDk"
+            }
+          ],
+          "preRequestTestResults": [],
+          "postResponseTestResults": [],
+          "shouldStopRunnerExecution": false,
+          "runDuration": 0.0779675,
+          "name": "1 - Ruta protegida sin token",
+          "suitename": "C:\\Users\\Lans_06\\Documents\\GitHub\\Web2-MENDOZA-QUIJIJE\\docs\\hito2_bruno\\1_sin_token",
+          "path": "1_sin_token",
+          "iterationIndex": 0
+        },
+        {
+          "test": {
+            "filename": "2_login.bru"
+          },
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/login",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "User-Agent": "bruno-runtime/4.3.0",
+              "Content-Length": "47",
+              "Accept-Encoding": "gzip, compress, deflate, br",
+              "Host": "localhost:8080",
+              "Connection": "keep-alive",
+              "Content-Type": "application/json"
+            },
+            "data": "{\n  \"usuario\": \"luis\",\n  \"clave\": \"luis-2026\"\n}"
+          },
+          "response": {
+            "status": 200,
+            "statusText": "OK",
+            "headers": {
+              "content-type": "application/json; charset=utf-8",
+              "date": "Tue, 27 Oct 2026 02:20:49 GMT",
+              "content-length": "202"
+            },
+            "data": {
+              "token": "[JWT oculto en el respaldo]"
+            },
+            "url": "http://localhost/login",
+            "responseTime": 64,
+            "duration": 64,
+            "size": 202
+          },
+          "error": null,
+          "status": "pass",
+          "assertionResults": [],
+          "testResults": [
+            {
+              "description": "Respuesta 200",
+              "status": "pass",
+              "uid": "fStlJVu3E695nHxCEFN0i"
+            },
+            {
+              "description": "Entrega token",
+              "status": "pass",
+              "uid": "3y-L1yFU95pdgwTEmVcNg"
+            }
+          ],
+          "preRequestTestResults": [],
+          "postResponseTestResults": [],
+          "shouldStopRunnerExecution": false,
+          "runDuration": 0.2006762,
+          "name": "2 - Login organizador",
+          "suitename": "C:\\Users\\Lans_06\\Documents\\GitHub\\Web2-MENDOZA-QUIJIJE\\docs\\hito2_bruno\\2_login",
+          "path": "2_login",
+          "iterationIndex": 0
+        },
+        {
+          "test": {
+            "filename": "3_con_token.bru"
+          },
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/eventos/31/inscripciones",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "User-Agent": "bruno-runtime/4.3.0",
+              "Accept-Encoding": "gzip, compress, deflate, br",
+              "Host": "localhost:8080",
+              "Connection": "keep-alive",
+              "Authorization": "[JWT oculto en el respaldo]",
+              "content-type": null
+            }
+          },
+          "response": {
+            "status": 200,
+            "statusText": "OK",
+            "headers": {
+              "content-type": "application/json; charset=utf-8",
+              "date": "Tue, 27 Oct 2026 02:20:49 GMT",
+              "content-length": "328"
+            },
+            "data": [
+              {
+                "id": 6,
+                "evento_id": 31,
+                "jugador_id": 1,
+                "estado": "pago_por_verificar",
+                "creado": "2026-10-26T21:20:49.386722-05:00",
+                "jugador": {
+                  "id": 1,
+                  "nombre": "ana"
+                },
+                "ultimo_pago": {
+                  "id": 3,
+                  "inscripcion_id": 6,
+                  "monto": 2.5,
+                  "banco": "Banco de ejemplo",
+                  "referencia": "HITO2-1793067649471",
+                  "verificado": false,
+                  "creado": "2026-10-26T21:20:49.478179-05:00"
+                }
+              }
+            ],
+            "url": "http://localhost/eventos/31/inscripciones",
+            "responseTime": 5,
+            "duration": 5,
+            "size": 328
+          },
+          "error": null,
+          "status": "pass",
+          "assertionResults": [],
+          "testResults": [
+            {
+              "description": "Respuesta 200",
+              "status": "pass",
+              "uid": "09D1TF8WzqaexwYsGgSov"
+            }
+          ],
+          "preRequestTestResults": [],
+          "postResponseTestResults": [],
+          "shouldStopRunnerExecution": false,
+          "runDuration": 0.078366,
+          "name": "3 - Misma ruta con token",
+          "suitename": "C:\\Users\\Lans_06\\Documents\\GitHub\\Web2-MENDOZA-QUIJIJE\\docs\\hito2_bruno\\3_con_token",
+          "path": "3_con_token",
+          "iterationIndex": 0
+        },
+        {
+          "test": {
+            "filename": "4_rol_sin_permiso.bru"
+          },
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/inscripciones/6/estado",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "User-Agent": "bruno-runtime/4.3.0",
+              "Content-Length": "28",
+              "Accept-Encoding": "gzip, compress, deflate, br",
+              "Host": "localhost:8080",
+              "Connection": "keep-alive",
+              "Content-Type": "application/json",
+              "Authorization": "[JWT oculto en el respaldo]"
+            },
+            "data": "{\n  \"estado\": \"confirmada\"\n}"
+          },
+          "response": {
+            "status": 403,
+            "statusText": "Forbidden",
+            "headers": {
+              "content-type": "application/json; charset=utf-8",
+              "date": "Tue, 27 Oct 2026 02:20:49 GMT",
+              "content-length": "50"
+            },
+            "data": {
+              "error": "tu rol no puede hacer esta transicion"
+            },
+            "url": "http://localhost/inscripciones/6/estado",
+            "responseTime": 7,
+            "duration": 7,
+            "size": 50
+          },
+          "error": null,
+          "status": "pass",
+          "assertionResults": [],
+          "testResults": [
+            {
+              "description": "Respuesta 403",
+              "status": "pass",
+              "uid": "mqUjiMG-gnFMCYeqXxRaC"
+            }
+          ],
+          "preRequestTestResults": [],
+          "postResponseTestResults": [],
+          "shouldStopRunnerExecution": false,
+          "runDuration": 0.0792388,
+          "name": "4 - Jugador no verifica pagos",
+          "suitename": "C:\\Users\\Lans_06\\Documents\\GitHub\\Web2-MENDOZA-QUIJIJE\\docs\\hito2_bruno\\4_rol_sin_permiso",
+          "path": "4_rol_sin_permiso",
+          "iterationIndex": 0
+        },
+        {
+          "test": {
+            "filename": "5_rol_correcto.bru"
+          },
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/inscripciones/6/estado",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "User-Agent": "bruno-runtime/4.3.0",
+              "Content-Length": "28",
+              "Accept-Encoding": "gzip, compress, deflate, br",
+              "Host": "localhost:8080",
+              "Connection": "keep-alive",
+              "Content-Type": "application/json",
+              "Authorization": "[JWT oculto en el respaldo]"
+            },
+            "data": "{\n  \"estado\": \"confirmada\"\n}"
+          },
+          "response": {
+            "status": 200,
+            "statusText": "OK",
+            "headers": {
+              "content-type": "application/json; charset=utf-8",
+              "date": "Tue, 27 Oct 2026 02:20:49 GMT",
+              "content-length": "105"
+            },
+            "data": {
+              "id": 6,
+              "evento_id": 31,
+              "jugador_id": 1,
+              "estado": "confirmada",
+              "creado": "2026-10-26T21:20:49.386722-05:00"
+            },
+            "url": "http://localhost/inscripciones/6/estado",
+            "responseTime": 9,
+            "duration": 9,
+            "size": 105
+          },
+          "error": null,
+          "status": "pass",
+          "assertionResults": [],
+          "testResults": [
+            {
+              "description": "Respuesta 200",
+              "status": "pass",
+              "uid": "b-5MJfUeyHBSx5FItu2eA"
+            },
+            {
+              "description": "Queda confirmada",
+              "status": "pass",
+              "uid": "BxB6TJdBw4-FIqyKGBKoY"
+            }
+          ],
+          "preRequestTestResults": [],
+          "postResponseTestResults": [],
+          "shouldStopRunnerExecution": false,
+          "runDuration": 0.0785187,
+          "name": "5 - Organizador verifica pago",
+          "suitename": "C:\\Users\\Lans_06\\Documents\\GitHub\\Web2-MENDOZA-QUIJIJE\\docs\\hito2_bruno\\5_rol_correcto",
+          "path": "5_rol_correcto",
+          "iterationIndex": 0
+        },
+        {
+          "test": {
+            "filename": "6_transicion_prohibida.bru"
+          },
+          "request": {
+            "method": "PATCH",
+            "url": "http://localhost:8080/inscripciones/5/estado",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "User-Agent": "bruno-runtime/4.3.0",
+              "Content-Length": "28",
+              "Accept-Encoding": "gzip, compress, deflate, br",
+              "Host": "localhost:8080",
+              "Connection": "keep-alive",
+              "Content-Type": "application/json",
+              "Authorization": "[JWT oculto en el respaldo]"
+            },
+            "data": "{\n  \"estado\": \"confirmada\"\n}"
+          },
+          "response": {
+            "status": 422,
+            "statusText": "Unprocessable Entity",
+            "headers": {
+              "content-type": "application/json; charset=utf-8",
+              "date": "Tue, 27 Oct 2026 02:20:50 GMT",
+              "content-length": "71"
+            },
+            "data": {
+              "error": "transicion prohibida: de cancelada no se pasa a confirmada"
+            },
+            "url": "http://localhost/inscripciones/5/estado",
+            "responseTime": 7,
+            "duration": 7,
+            "size": 71
+          },
+          "error": null,
+          "status": "pass",
+          "assertionResults": [],
+          "testResults": [
+            {
+              "description": "Respuesta 422",
+              "status": "pass",
+              "uid": "PN5Tyr_nIWdzKf3aOLlCT"
+            }
+          ],
+          "preRequestTestResults": [],
+          "postResponseTestResults": [],
+          "shouldStopRunnerExecution": false,
+          "runDuration": 0.0939257,
+          "name": "6 - Cancelada no vuelve a confirmada",
+          "suitename": "C:\\Users\\Lans_06\\Documents\\GitHub\\Web2-MENDOZA-QUIJIJE\\docs\\hito2_bruno\\6_transicion_prohibida",
+          "path": "6_transicion_prohibida",
+          "iterationIndex": 0
+        }
+      ],
+      "summary": {
+        "totalRequests": 7,
+        "passedRequests": 7,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 9,
+        "passedTests": 9,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    }
+  ]
+}

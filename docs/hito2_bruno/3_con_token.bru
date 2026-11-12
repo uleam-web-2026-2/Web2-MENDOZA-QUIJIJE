@@ -1,0 +1,21 @@
+meta {
+  name: 3 - Misma ruta con token
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/eventos/{{eventoId}}/inscripciones
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{tokenOrganizador}}
+}
+
+tests {
+  test("Respuesta 200", function () {
+    expect(res.status).to.equal(200);
+  });
+}

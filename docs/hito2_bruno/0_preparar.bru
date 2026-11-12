@@ -1,0 +1,47 @@
+meta {
+  name: 0 - Preparar registros nuevos
+  type: http
+  seq: 0
+}
+
+post {
+  url: {{baseUrl}}/eventos/{{eventoId}}/inscripciones
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const base = bru.getEnvVar("baseUrl");
+  async function enviar(method, path, data, token, esperado) {
+    const r = await bru.sendRequest({method, url:base+path, data, headers:{"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{})}});
+    if (r.status !== esperado) throw new Error("Preparacion: "+method+" "+path+" esperaba "+esperado+", recibio "+r.status);
+    return r.data;
+  }
+  const jugador = (await enviar("POST","/login",{usuario:"ana",clave:"ana-2026"},null,200)).token;
+  const organizador = (await enviar("POST","/login",{usuario:"luis",clave:"luis-2026"},null,200)).token;
+  bru.setVar("tokenJugador",jugador);
+  bru.setVar("tokenOrganizadorPrevio",organizador);
+  bru.setVar("tokenOrganizador","");
+  function evento(precio) { return {titulo:"Hito 2 "+Date.now(),deporte:"futbol",nivel:"casual",inicio:new Date(Date.now()+7*86400000).toISOString(),cupos:14,precio,sede_id:3}; }
+  const e = await enviar("POST","/eventos",evento(2.5),organizador,201);
+  bru.setVar("eventoId",e.id);
+  const eFinal = await enviar("POST","/eventos",evento(0),organizador,201);
+  const iFinal = await enviar("POST","/eventos/"+eFinal.id+"/inscripciones",null,jugador,201);
+  await enviar("PATCH","/inscripciones/"+iFinal.id+"/estado",{estado:"cancelada"},jugador,200);
+  bru.setVar("canceladaId",iFinal.id);
+  req.setUrl(base+"/eventos/"+e.id+"/inscripciones");
+  req.setHeader("Authorization","Bearer "+jugador);
+}
+
+script:post-response {
+  if (res.status !== 201) throw new Error("La peticion 0 no creo la inscripcion");
+  bru.setVar("inscripcionId",res.body.id);
+  const r = await bru.sendRequest({method:"PATCH",url:bru.getEnvVar("baseUrl")+"/inscripciones/"+res.body.id+"/estado",headers:{"Content-Type":"application/json",Authorization:"Bearer "+bru.getVar("tokenJugador")},data:{estado:"pago_por_verificar",banco:"Banco de ejemplo",referencia:"HITO2-"+Date.now()}});
+  if (r.status !== 200) throw new Error("No se pudo preparar el comprobante");
+}
+
+tests {
+  test("Respuesta 201", function () {
+    expect(res.status).to.equal(201);
+  });
+}

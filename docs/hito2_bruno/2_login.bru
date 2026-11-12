@@ -1,0 +1,33 @@
+meta {
+  name: 2 - Login organizador
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "usuario": "luis",
+    "clave": "luis-2026"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) bru.setVar("tokenOrganizador",res.body.token);
+}
+
+tests {
+  test("Respuesta 200", function () {
+    expect(res.status).to.equal(200);
+  });
+  test("Entrega token", function () { expect(res.body.token).to.be.a("string").and.not.empty; });
+}
