@@ -1,0 +1,15 @@
+2026/11/13 03:29:23 EventoSports listo en http://localhost:8080
+2026/11/13 03:29:47 "POST http://localhost:8080/login HTTP/1.1" from 172.17.0.1:43352 - 200 196B in 56.098542ms
+2026/11/13 03:29:48 "POST http://localhost:8080/login HTTP/1.1" from 172.17.0.1:43356 - 200 202B in 55.996333ms
+2026/11/13 03:29:48 "POST http://localhost:8080/eventos HTTP/1.1" from 172.17.0.1:43360 - 201 279B in 17.547659ms
+2026/11/13 03:29:48 "POST http://localhost:8080/eventos HTTP/1.1" from 172.17.0.1:43376 - 201 277B in 7.738635ms
+2026/11/13 03:29:48 "POST http://localhost:8080/eventos/52/inscripciones HTTP/1.1" from 172.17.0.1:43392 - 201 103B in 12.003734ms
+2026/11/13 03:29:48 "PATCH http://localhost:8080/inscripciones/25/estado HTTP/1.1" from 172.17.0.1:43400 - 200 100B in 13.595261ms
+2026/11/13 03:29:48 "POST http://localhost:8080/eventos/51/inscripciones HTTP/1.1" from 172.17.0.1:43412 - 201 103B in 8.268948ms
+2026/11/13 03:29:48 "PATCH http://localhost:8080/inscripciones/26/estado HTTP/1.1" from 172.17.0.1:43424 - 200 109B in 10.104547ms
+2026/11/13 03:29:48 "GET http://localhost:8080/eventos/51/inscripciones HTTP/1.1" from 172.17.0.1:43436 - 401 58B in 87.082µs
+2026/11/13 03:29:48 "POST http://localhost:8080/login HTTP/1.1" from 172.17.0.1:43446 - 200 202B in 55.254826ms
+2026/11/13 03:29:48 "GET http://localhost:8080/eventos/51/inscripciones HTTP/1.1" from 172.17.0.1:43450 - 200 321B in 9.435179ms
+2026/11/13 03:29:48 "PATCH http://localhost:8080/inscripciones/26/estado HTTP/1.1" from 172.17.0.1:43452 - 403 50B in 8.491648ms
+2026/11/13 03:29:48 "PATCH http://localhost:8080/inscripciones/26/estado HTTP/1.1" from 172.17.0.1:43462 - 200 101B in 15.21741ms
+2026/11/13 03:29:49 "PATCH http://localhost:8080/inscripciones/25/estado HTTP/1.1" from 172.17.0.1:43470 - 422 71B in 8.922464ms

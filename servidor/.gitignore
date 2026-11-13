@@ -1,3 +1,6 @@
 .env
 *.exe
 /eventosports
+# Taller 11: .env.docker y cualquier otro archivo de variables no se suben.
+.env.*
+!.env.example

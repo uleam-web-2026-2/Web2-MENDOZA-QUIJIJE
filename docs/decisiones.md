@@ -60,6 +60,36 @@ La petición 0 de Bruno hace la preparación antes del turno: inicia ambas sesio
 
 Los IDs y los tokens se conservan únicamente en variables de ejecución `bru.setVar`. No se escriben JWT en los archivos `.bru` ni en el entorno versionado. La petición 2 vuelve a iniciar sesión en vivo y obtiene el token usado en 3, 5 y 6. Las peticiones 4 y 5 comparten ID y cuerpo. La 6 usa otro registro ya cancelado. Ejecutar de nuevo la 0 prepara datos nuevos sin borrar datos anteriores.
 
+## Semana 11 · el contenedor
+
+### D1 · Qué entra en la imagen
+
+La imagen final, `eventosports:latest`, tiene solo dos cosas: la base distroless `static-debian13:nonroot` y nuestro binario `/servidor`. En `capas.txt`, la línea `COPY /servidor /servidor` muestra que el binario pesa 21.9 MB; lo demás son los archivos mínimos de distroless. Según `imagenes.txt`, la imagen ocupa 39.6 MB en disco (11.9 MB de contenido). La etapa de compilación, `eventosports:compilacion`, ocupa 1.63 GB (389 MB de contenido), porque lleva Go, el código fuente y las librerías descargadas. Nada de eso pasa a la imagen final.
+
+El proceso arranca como el usuario 65532, sin privilegios (`usuario.txt`).
+
+Sin `.dockerignore`, `docker build .` enviaría también `servidor/.env` y `.env.docker`, y `COPY . .` los dejaría en `/src` de la etapa de compilación, con la clave de la base y el secreto JWT. A la imagen final no llegarían, porque de esa etapa solo se copia el binario; pero quedarían en la imagen intermedia y en la caché de construcción. `contexto.txt` muestra que con `.dockerignore` no entran ni `.env` ni `.git`.
+
+### D2 · Dónde está la base, vista desde el contenedor
+
+Con el mismo `.env` de `go run`, el contenedor respondió «no se pudo conectar a PostgreSQL» (`2_local.txt`). Dentro del contenedor, `localhost` es el propio contenedor, y ahí no hay ninguna base. En `.env.docker` cambiamos solo el host por `host.docker.internal`, que Docker Desktop resuelve como nuestra máquina, donde PostgreSQL 16 escucha en el 5432. No hizo falta cambiar el código.
+
+En un servidor que no sea nuestra máquina, `host.docker.internal` no sirve: `DATABASE_URL` tendría que apuntar al nombre o la dirección del servidor de base de datos. Solo cambia la variable, no el código.
+
+### D3 · Los puertos
+
+Usamos `-p 8080:8080`. El número de la izquierda es el puerto de nuestra máquina, al que llama Bruno. El de la derecha es el del contenedor, donde escucha el servidor, y tiene que coincidir con `PORT` de `.env.docker`. Si no coincide, Docker pasa las peticiones a un puerto donde no escucha nadie y la conexión se corta. El de la izquierda sí se puede cambiar: con `-p 8081:8080`, Bruno tendría que llamar a `localhost:8081`.
+
+### D4 · La hora
+
+En el paso 2.5, `creado` salió con `go run` como `2026-11-12T22:26:53.4017-05:00`, y en el contenedor como `2026-11-13T03:29:48.159934Z`. Son registros distintos, porque la petición 0 crea uno nuevo cada vez, pero el cambio es de formato: `-05:00` es la hora de Ecuador y `Z` es UTC. Las dos formas indican el instante exacto; `22:26:53-05:00` es lo mismo que `03:26:53Z`. El log del contenedor también marca las 03:29 cuando aquí eran las 22:29.
+
+Cambió porque Go escribe las fechas en la zona horaria del sistema. Windows está configurado en la hora de Ecuador; el contenedor distroless no tiene ninguna zona configurada, así que usa UTC.
+
+Decidimos dejarlo así: las fechas siguen siendo correctas porque llevan su desfase, y quien las muestre las convierte a la hora local. En nuestro negocio importaría en la regla de cancelar una inscripción confirmada con 24 horas de anticipación, pero esa regla compara la diferencia entre dos momentos (`e.Inicio.Sub(ahora)`), y la diferencia no depende de la zona.
+
 ## Uso de IA
 
 La separación en capas, las pruebas, el contrato, los scripts, la colección y esta documentación se prepararon con asistencia de Codex. Los archivos de tokens y guardia provienen del material docente. La pareja debe revisar las decisiones y explicar el código con sus propias razones. No se fabricaron commits de ningún integrante ni se hizo push automáticamente.
+
+En la semana 11, Claude Code ayudó a construir y probar la imagen, el contenedor y `compose.yaml`, a generar las evidencias y a redactar el borrador de D1 a D9. La pareja debe revisarlas y escribirlas con sus propias razones.

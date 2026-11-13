@@ -1,0 +1,1 @@
+2026/11/13 03:29:21 no se pudo conectar a PostgreSQL; revise DATABASE_URL y el servicio

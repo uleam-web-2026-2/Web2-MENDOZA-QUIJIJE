@@ -7,6 +7,7 @@ import (
 	"eventosports/internal/negocio"
 	"eventosports/internal/sesion"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -38,6 +39,8 @@ func main() {
 		}
 	}
 	r := chi.NewRouter()
+	// Una linea por peticion en el log: prueba que respondio el contenedor (taller 11).
+	r.Use(middleware.Logger)
 	tokens := sesion.NuevosTokens(c.Secreto)
 	servicio := &negocio.Servicio{Almacen: &datos.AlmacenGORM{DB: db}}
 	(&eventosports.Manejador{Servicio: servicio, Sesion: &sesion.Manejador{DB: db, Tokens: tokens}}).Rutas(r, tokens)
