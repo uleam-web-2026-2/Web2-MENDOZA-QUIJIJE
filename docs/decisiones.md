@@ -122,4 +122,4 @@ docker compose exec db psql -U eventosports -d eventosports
 
 La separación en capas, las pruebas, el contrato, los scripts, la colección y esta documentación se prepararon con asistencia de Codex. Los archivos de tokens y guardia provienen del material docente. La pareja debe revisar las decisiones y explicar el código con sus propias razones. No se fabricaron commits de ningún integrante ni se hizo push automáticamente.
 
-En la semana 11, Claude Code ayudó a construir y probar la imagen, el contenedor y `compose.yaml`, a generar las evidencias y a redactar el borrador de D1 a D9. La pareja debe revisarlas y escribirlas con sus propias razones.
+El taller de la semana 11 lo hicimos los dos integrantes, Sebastián Mendoza y Evelin Quijije. Evelin preparó el Dockerfile y la primera construcción de la imagen; el resto lo trabajamos entre los dos y se subió desde la cuenta de Sebastián. Usamos Claude Code como apoyo para construir y probar la imagen, el contenedor y `compose.yaml`, para generar las evidencias y para redactar el borrador de D1 a D9, que revisamos entre los dos.
