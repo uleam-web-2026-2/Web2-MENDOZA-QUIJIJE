@@ -1,4 +1,9 @@
-name: eventosports-s7
+# Taller 11 · la API y PostgreSQL juntas, con un solo comando:
+#   docker compose up -d --build
+# Las claves salen de servidor/.env, que no se sube. Este archivo no tiene ninguna.
+# El nombre del proyecto y del volumen son nuevos: no tocan los del hito 2.
+name: eventosports-t11
+
 services:
   db:
     image: postgres:16
@@ -6,14 +11,31 @@ services:
       POSTGRES_USER: eventosports
       POSTGRES_DB: eventosports
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en servidor/.env}
-    ports:
-      - "127.0.0.1:5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - datos:/var/lib/postgresql/data
+    # Por TCP (-h 127.0.0.1): mientras la base se inicializa solo escucha por socket,
+    # asi que no se da por lista antes de tiempo.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U eventosports -d eventosports"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U eventosports -d eventosports"]
       interval: 3s
       timeout: 3s
-      retries: 15
+      retries: 20
+    # Sin ports: la base no se publica en la maquina y no choca con otro PostgreSQL.
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: ${PORT:-8080}
+      # "db" es el nombre del servicio: Compose lo resuelve dentro de su red.
+      DATABASE_URL: postgres://eventosports:${POSTGRES_PASSWORD}@db:5432/eventosports?sslmode=disable
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en servidor/.env}
+      DEMO_SEED: ${DEMO_SEED:-false}
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
+    restart: unless-stopped
+
 volumes:
-  postgres_data:
+  datos:

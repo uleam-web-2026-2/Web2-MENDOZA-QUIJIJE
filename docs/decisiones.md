@@ -88,6 +88,36 @@ Cambió porque Go escribe las fechas en la zona horaria del sistema. Windows est
 
 Decidimos dejarlo así: las fechas siguen siendo correctas porque llevan su desfase, y quien las muestre las convierte a la hora local. En nuestro negocio importaría en la regla de cancelar una inscripción confirmada con 24 horas de anticipación, pero esa regla compara la diferencia entre dos momentos (`e.Inicio.Sub(ahora)`), y la diferencia no depende de la zona.
 
+## Semana 11 · reto: la API y la base, juntas
+
+### D5 · Cómo encuentra la API a la base
+
+En `compose.yaml`, la API usa `db:5432`. `db` es el nombre del servicio de la base, y Compose lo resuelve dentro de la red que crea para el proyecto. El 5432 es el puerto de PostgreSQL dentro de su contenedor. El 5433 era el puerto publicado en nuestra máquina para el contenedor del hito 2; dentro de la red de Compose, la API habla de contenedor a contenedor y no pasa por nuestra máquina, así que no usa ni `host.docker.internal` ni el 5433.
+
+### D6 · El orden de arranque
+
+`depends_on` con `condition: service_healthy` hace que la API espere a que la base pase su `healthcheck`. El `healthcheck` usa `pg_isready` por TCP (`-h 127.0.0.1`): la primera vez, mientras PostgreSQL crea la base, solo atiende por socket y después se reinicia, y así no se da por lista antes de tiempo. También pusimos `restart: unless-stopped` como respaldo.
+
+En nuestras pruebas, con la base vacía, la API arrancó bien las tres veces y sin reinicios (`RestartCount` 0). No llegamos a ver el fallo, porque el `healthcheck` estaba desde el principio.
+
+### D7 · Dónde quedan los datos
+
+En el volumen con nombre `datos` (en Docker, `eventosports-t11_datos`), montado en `/var/lib/postgresql/data`. `docker compose down` borra los contenedores pero no el volumen: había 2 inscripciones antes de bajar y subir, y seguían 2 después. `docker compose down -v` borra también el volumen.
+
+El nombre del volumen lo arma Compose con el nombre del proyecto. Lo comprobamos de la peor forma: un `docker compose down -v` con el `compose.yaml` anterior, cuyo proyecto se llamaba `eventosports-s7`, borró el volumen de la base del hito 2. Por eso este proyecto se llama `eventosports-t11` y su volumen tiene otro nombre.
+
+### D8 · Los secretos
+
+`compose.yaml` no tiene claves: usa `${POSTGRES_PASSWORD}` y `${JWT_SECRET}`, que Compose lee de `servidor/.env`, y `.env` no se sube a Git. Con `:?`, Compose se detiene con un mensaje si falta alguna. `.env.example` dice qué variables hay que definir.
+
+### D9 · Lo que se publica en la máquina
+
+Solo la API, en `${PORT:-8080}:${PORT:-8080}`, para que Bruno siga llamando a `localhost:8080`. La base no se publica: así no choca con el PostgreSQL de Windows (5432) ni con el contenedor del hito 2 (5433), aunque estén encendidos. Para consultarla con `psql`, entramos en su contenedor:
+
+```bash
+docker compose exec db psql -U eventosports -d eventosports
+```
+
 ## Uso de IA
 
 La separación en capas, las pruebas, el contrato, los scripts, la colección y esta documentación se prepararon con asistencia de Codex. Los archivos de tokens y guardia provienen del material docente. La pareja debe revisar las decisiones y explicar el código con sus propias razones. No se fabricaron commits de ningún integrante ni se hizo push automáticamente.

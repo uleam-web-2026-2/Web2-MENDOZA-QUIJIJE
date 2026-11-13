@@ -1,0 +1,19 @@
+NAME                     IMAGE                  COMMAND                  SERVICE   CREATED          STATUS                    PORTS
+eventosports-t11-api-1   eventosports-t11-api   "/servidor"              api       13 seconds ago   Up 9 seconds              0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+eventosports-t11-db-1    postgres:16            "docker-entrypoint.s…"   db        13 seconds ago   Up 13 seconds (healthy)   5432/tcp
+api-1  | 2026/11/13 03:41:37 EventoSports listo en http://localhost:8080
+api-1  | 2026/11/13 03:41:37 "GET http://localhost:8080/eventos HTTP/1.1" from 172.22.0.1:51294 - 200 573B in 3.621597ms
+api-1  | 2026/11/13 03:41:44 "POST http://localhost:8080/login HTTP/1.1" from 172.22.0.1:37272 - 200 196B in 52.051967ms
+api-1  | 2026/11/13 03:41:44 "POST http://localhost:8080/login HTTP/1.1" from 172.22.0.1:37274 - 200 202B in 52.373559ms
+api-1  | 2026/11/13 03:41:44 "POST http://localhost:8080/eventos HTTP/1.1" from 172.22.0.1:37286 - 201 279B in 3.326026ms
+api-1  | 2026/11/13 03:41:44 "POST http://localhost:8080/eventos HTTP/1.1" from 172.22.0.1:37288 - 201 277B in 2.186249ms
+api-1  | 2026/11/13 03:41:44 "POST http://localhost:8080/eventos/28/inscripciones HTTP/1.1" from 172.22.0.1:37294 - 201 102B in 3.791209ms
+api-1  | 2026/11/13 03:41:44 "PATCH http://localhost:8080/inscripciones/1/estado HTTP/1.1" from 172.22.0.1:37300 - 200 99B in 4.071117ms
+api-1  | 2026/11/13 03:41:45 "POST http://localhost:8080/eventos/27/inscripciones HTTP/1.1" from 172.22.0.1:37316 - 201 102B in 1.945356ms
+api-1  | 2026/11/13 03:41:45 "PATCH http://localhost:8080/inscripciones/2/estado HTTP/1.1" from 172.22.0.1:37318 - 200 108B in 3.275521ms
+api-1  | 2026/11/13 03:41:45 "GET http://localhost:8080/eventos/27/inscripciones HTTP/1.1" from 172.22.0.1:37326 - 401 58B in 62.533µs
+api-1  | 2026/11/13 03:41:45 "POST http://localhost:8080/login HTTP/1.1" from 172.22.0.1:37334 - 200 202B in 54.04659ms
+api-1  | 2026/11/13 03:41:45 "GET http://localhost:8080/eventos/27/inscripciones HTTP/1.1" from 172.22.0.1:37346 - 200 318B in 3.107867ms
+api-1  | 2026/11/13 03:41:45 "PATCH http://localhost:8080/inscripciones/2/estado HTTP/1.1" from 172.22.0.1:37348 - 403 50B in 1.488395ms
+api-1  | 2026/11/13 03:41:45 "PATCH http://localhost:8080/inscripciones/2/estado HTTP/1.1" from 172.22.0.1:37350 - 200 100B in 2.819362ms
+api-1  | 2026/11/13 03:41:45 "PATCH http://localhost:8080/inscripciones/1/estado HTTP/1.1" from 172.22.0.1:37352 - 422 71B in 1.391568ms

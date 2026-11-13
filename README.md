@@ -1,6 +1,31 @@
-# EventoSports · Hito 2
+# EventoSports · Hito 2 y taller 11
 
 Sebastián Mendoza y Evelin Quijije · Grupo E · Aplicaciones Web II A.
+
+## Taller 11 · la API en un contenedor
+
+Rama `taller11`. Parte del código del Hito 2. Las evidencias están en `docs/taller11/`, y las decisiones D1 a D9, en `docs/decisiones.md`.
+
+| Parte | Qué hay | Evidencia |
+|---|---|---|
+| Fase 0 | Línea de base con `go run` y respuesta completa de la petición 3 | `docs/taller11/peticiones.md` |
+| 1. La imagen | `servidor/Dockerfile` de dos etapas y `servidor/.dockerignore`. La imagen pesa 39.6 MB, la de compilación 1.63 GB, no entran `.env` ni `.git`, y arranca como el usuario 65532 | `imagenes.txt`, `capas.txt`, `contexto.txt`, `usuario.txt` |
+| 2. El contenedor | Arranca sin `.env`, con `--env-file .env.docker` y `-p 8080:8080`, y responde los mismos seis códigos. `main.go` registra cada petición en el log | `1_sin_variables.txt`, `2_local.txt`, `logs_contenedor.txt`, `peticiones.md` |
+| Reto | `servidor/compose.yaml` levanta la base y la API con un solo comando, sin `host.docker.internal` ni claves escritas | `compose.txt`, `peticiones.md` |
+
+Comprobado el 12 de noviembre de 2026: las seis peticiones dan 401, 200, 200, 403, 200 y 422 con `go run`, en el contenedor y con Compose. Compose arrancó tres veces seguidas desde una base vacía, sin reinicios de la API, y los datos sobrevivieron a un `docker compose down`.
+
+Desde `servidor/`:
+
+```powershell
+docker build -t eventosports .
+docker run -d --name eventosports-api -p 8080:8080 --env-file .env.docker eventosports
+docker compose up -d --build
+```
+
+`.env.docker` es una copia de `.env` con `host.docker.internal` en lugar de `localhost`, y Git lo ignora. Compose toma las claves de `servidor/.env`. **`docker compose down -v` borra la base de Compose**: úsese solo para empezar desde cero.
+
+La única línea de Go que se agregó es `r.Use(middleware.Logger)` en `main.go`: sin ella, el log del contenedor no mostraba las peticiones, y el taller pide esa prueba.
 
 La entrega técnica reúne PostgreSQL, autenticación JWT, permisos, estados y pruebas del taller S7 con la separación en capas de la semana 8. La demostración usa una colección de Bruno preparada para responder **401 → 200 → 200 → 403 → 200 → 422**.
 
@@ -13,11 +38,19 @@ Desde la raíz, en una terminal:
 ```powershell
 cd servidor
 powershell -ExecutionPolicy Bypass -File scripts/preparar-entorno.ps1
-docker compose up -d --wait db
-go run .
+docker compose up -d --build
 ```
 
-Se conserva el único contenedor PostgreSQL de EventoSports, en `localhost:5433`. No se agregaron servicios nuevos para el Hito 2. El servidor corre en `http://localhost:8080`. `.env` guarda la conexión y el secreto JWT local y está excluido de Git.
+Eso levanta la base y la API juntas, en `http://localhost:8080`.
+
+Para trabajar con `go run .`, en cambio, hace falta PostgreSQL 16 instalado en el equipo, en `localhost:5432`, con el usuario y la base `eventosports`. La primera vez se crean así, desde `servidor/`, con la clave del usuario `postgres`:
+
+```powershell
+$clave = ((Select-String -LiteralPath .env -Pattern '^POSTGRES_PASSWORD=').Line -split '=',2)[1]
+& 'C:\Program Files\PostgreSQL\16\bin\psql.exe' -U postgres -h localhost -d postgres -c "CREATE ROLE eventosports LOGIN PASSWORD '$clave'" -c "CREATE DATABASE eventosports OWNER eventosports"
+```
+
+`.env` guarda la conexión y el secreto JWT local y está excluido de Git.
 
 Con `DEMO_SEED=true`: Ana (`ana` / `ana-2026`) es jugador y Luis (`luis` / `luis-2026`) es organizador. Son credenciales inventadas de la demostración; las contraseñas se guardan con bcrypt.
 
