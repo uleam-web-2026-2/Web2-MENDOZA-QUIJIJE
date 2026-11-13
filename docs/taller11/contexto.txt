@@ -1,0 +1,12 @@
+.
+..
+.dockerignore
+.env.example
+.gitignore
+Dockerfile
+compose.yaml
+go.mod
+go.sum
+internal
+main.go
+scripts
