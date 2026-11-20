@@ -96,8 +96,13 @@ func baseDePrueba(t *testing.T) *gorm.DB {
 	t.Helper()
 	dsn := os.Getenv("TEST_DATABASE_URL")
 	if dsn == "" {
+		// Las pruebas crean y borran su propio esquema: necesitan al dueño
+		// de las tablas, no al usuario de la API (taller 12, reto).
 		valores, _ := godotenv.Read("../../.env")
-		dsn = valores["DATABASE_URL"]
+		dsn = valores["MIGRACION_DATABASE_URL"]
+		if dsn == "" {
+			dsn = valores["DATABASE_URL"]
+		}
 	}
 	if dsn == "" {
 		t.Skip("integracion PostgreSQL: configure TEST_DATABASE_URL o servidor/.env")

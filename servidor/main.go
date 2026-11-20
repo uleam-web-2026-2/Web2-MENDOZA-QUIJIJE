@@ -6,6 +6,7 @@ import (
 	"eventosports/internal/eventosports"
 	"eventosports/internal/negocio"
 	"eventosports/internal/sesion"
+	"flag"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -19,11 +20,24 @@ import (
 )
 
 func main() {
+	migrar := flag.Bool("migrar", false, "con el dueño de las tablas: migra, siembra y da permisos al usuario de la API; después termina")
+	flag.Parse()
 	c, err := configuracion.Leer()
 	if err != nil {
 		log.Fatal(err)
 	}
-	db, err := gorm.Open(postgres.Open(c.Base), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
+	cfg := &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)}
+	if *migrar {
+		if err := migrarConDueno(c, cfg); err != nil {
+			log.Fatal("migración: ", err)
+		}
+		log.Println("migración lista: tablas, ejemplos y permisos del usuario de la API")
+		return
+	}
+	// La API se conecta con su propio usuario (DATABASE_URL), que no es
+	// superusuario ni dueño de las tablas. Por eso ya no corre AutoMigrate:
+	// las tablas las crea y las cambia el dueño con go run . -migrar.
+	db, err := gorm.Open(postgres.Open(c.Base), cfg)
 	if err != nil {
 		log.Fatal("no se pudo conectar a PostgreSQL; revise DATABASE_URL y el servicio")
 	}
@@ -32,14 +46,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer sqlDB.Close()
-	if err := datos.Migrar(db); err != nil {
-		log.Fatal("no se pudieron crear las tablas: ", err)
-	}
-	if c.Demo {
-		if err := datos.SembrarDemo(db); err != nil {
-			log.Fatal("no se pudieron preparar los ejemplos: ", err)
-		}
-	}
 	r := chi.NewRouter()
 	// CORS arriba de todo: responde las peticiones previas (OPTIONS), que
 	// no tienen manejador ni token. Mínimo privilegio: se nombra el front,

@@ -30,3 +30,15 @@ La prueba del paso 1.4 está en `inyeccion.txt`: `?ciudad=Manta` trae los evento
 `?ciudad=' OR 1=1 --` devuelve `[]`, `?deporte=' OR 1=1 --` responde 422 y
 `/inscripciones/1%20OR%201=1` responde 400. Lo mismo queda como prueba automática en
 `servidor/internal/eventosports/inyeccion_test.go` (paso 1.4 opcional), que pasa con `go test ./...`.
+
+## Después del reto
+
+El reto agregó `servidor/internal/datos/permisos.go`, que crea el usuario de la API y le da permisos.
+La misma búsqueda, ahora con `--untracked`, dio 30 líneas (`auditoria_despues.txt`): las 27 de antes
+y tres nuevas.
+
+| Línea | ¿Arma SQL? | ¿Llega texto del cliente? | ¿Va aparte? | Qué hicimos |
+| --- | --- | --- | --- | --- |
+| `datos/permisos.go:36` `Raw("SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = ?)", usuario)` | Sí | No: el nombre sale de `DATABASE_URL` en el `.env` del servidor | Sí, con `?` | Nada |
+| `datos/permisos.go:78` `Raw(plantilla, valores...)` | Sí: `SELECT format('GRANT … %I …', ?)` | No: las plantillas son textos fijos del código y los valores salen de `.env` y de la lista `permisosAPI` | Sí: los valores van con `?` y PostgreSQL los cita con `%I` (nombre) o `%L` (valor) | Nada |
+| `datos/permisos.go:81` `Exec(orden)` | Sí: ejecuta la orden que armó `format()` | No | No se puede: `CREATE ROLE`, `ALTER ROLE` y `GRANT` no aceptan `$1`. Por eso la cita la hace el servidor con `format()` en la línea 78, no un `+` en Go | Nada. Solo corre en `go run . -migrar`, nunca desde una ruta HTTP |

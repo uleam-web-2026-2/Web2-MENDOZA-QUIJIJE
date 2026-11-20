@@ -14,8 +14,11 @@ Desde la raíz, en una terminal:
 cd servidor
 powershell -ExecutionPolicy Bypass -File scripts/preparar-entorno.ps1
 docker compose up -d --wait db
+go run . -migrar
 go run .
 ```
+
+`go run . -migrar` se conecta con el dueño de las tablas (`MIGRACION_DATABASE_URL`), crea o cambia las tablas, siembra los ejemplos y deja al usuario de la API (`eventosports_api`, el de `DATABASE_URL`) con los permisos justos. Hay que correrlo la primera vez y cada vez que cambie un modelo; `go run .` ya no migra (taller 12, reto).
 
 Se conserva el único contenedor PostgreSQL de EventoSports, en `localhost:5433`. No se agregaron servicios nuevos para el Hito 2. El servidor corre en `http://localhost:8080`. `.env` guarda la conexión y el secreto JWT local y está excluido de Git.
 

@@ -1,0 +1,20 @@
+BEGIN
+ERROR:  permission denied for table inscripciones
+ROLLBACK
+BEGIN
+ERROR:  permission denied for table eventos
+ROLLBACK
+BEGIN
+ERROR:  permission denied for schema public
+LINE 1: create table intrusa (id int)
+                     ^
+ROLLBACK
+BEGIN
+ERROR:  permission denied to create role
+DETAIL:  Only roles with the CREATEROLE attribute may create roles.
+ROLLBACK
+ cuentas_visibles 
+------------------
+                2
+(1 row)
+

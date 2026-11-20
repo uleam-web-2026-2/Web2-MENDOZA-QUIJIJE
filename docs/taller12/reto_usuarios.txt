@@ -1,0 +1,6 @@
+                                 List of roles
+    Role name     |                         Attributes                         
+------------------+------------------------------------------------------------
+ eventosports     | Superuser, Create role, Create DB, Replication, Bypass RLS
+ eventosports_api | No inheritance
+

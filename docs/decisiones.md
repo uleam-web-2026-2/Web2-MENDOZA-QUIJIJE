@@ -91,4 +91,28 @@ En la ráfaga (`rafaga.txt`), los cinco primeros intentos dieron 401 con `X-Rate
 No se puede confiar en `X-Forwarded-For` sin más porque la escribe el cliente: un atacante pondría un valor distinto en cada petición y nunca llegaría al tope. Lo correcto es aceptarla solo cuando la conexión viene del proxy que conocemos, y tomar la IP que agregó ese proxy. Chi 5.5.0 lo trae: `middleware.ClientIPFromXFF("rango/del/proxy")`, o `ClientIPFromXFFTrustedProxies(1)` si hay exactamente un proxy delante y la red garantiza que nadie más llega a la API.
 
 ### Uso de IA en la semana 12
-Claude Code (Claude Opus 5.5) diagnosticó la conexión a PostgreSQL, corrió las búsquedas, las pruebas, la ráfaga y las peticiones de Bruno, escribió el código de CORS, del límite y de las pruebas nuevas, y redactó la auditoría y D1 a D4 a partir de esas salidas. Carlos aprobó cada comando. Las evidencias de `docs/taller12/` son las salidas tal como las dieron los comandos. La pareja tiene que revisar estas decisiones para poder defenderlas sin IA en el hito 3.
+Claude Code (Claude Opus 5.5) diagnosticó la conexión a PostgreSQL; corrió las búsquedas, las pruebas, la ráfaga y las peticiones de Bruno; escribió el código de CORS, del límite, del usuario de la base (reto) y de las pruebas nuevas; y redactó la auditoría y D1 a D7 a partir de esas salidas. Carlos aprobó cada comando. Las evidencias de `docs/taller12/` son las salidas tal como las dieron los comandos. La pareja tiene que revisar estas decisiones para poder defenderlas sin IA en el hito 3.
+
+## Semana 12 · reto: mínimo privilegio en la base
+
+### D5 · Con qué usuario se conecta la API
+Con `eventosports_api` (el de `DATABASE_URL`). No es superusuario, no puede crear bases ni usuarios, no hereda permisos y no es dueño de ninguna tabla (`reto_usuarios.txt`). Su clave es aleatoria y vive solo en el `.env` de cada máquina. En el repositorio solo está el marcador de `.env.example`. Los permisos, tabla por tabla (`reto_permisos.txt`), son exactamente los que usa la API:
+
+| Tabla | Permisos | Por qué |
+| --- | --- | --- |
+| `cuentas` | `SELECT` | El login lee nombre, rol y resumen de la clave; la siembra la hace el dueño |
+| `usuarios`, `sedes` | `SELECT` | Perfiles, filtro `?ciudad=` y vista del evento; la API no los cambia |
+| `eventos` | `SELECT`, `INSERT`, `UPDATE (cupos)` | El organizador crea eventos, pero la API nunca los cambia. `UPDATE (cupos)` está solo porque PostgreSQL pide UPDATE en alguna columna para `SELECT … FOR UPDATE`, el bloqueo que evita vender dos veces el último cupo |
+| `inscripciones` | `SELECT`, `INSERT`, `UPDATE (estado)` | Reservar y cambiar el estado; ninguna otra columna se cambia |
+| `pagos` | `SELECT`, `INSERT`, `UPDATE (verificado)` | Registrar el comprobante y verificarlo |
+| `eventos_id_seq`, `inscripciones_id_seq`, `pagos_id_seq` | `USAGE` | Los `id` nuevos salen de la secuencia, que tiene su propio permiso |
+
+Ninguna tabla tiene `DELETE`, `TRUNCATE`, `REFERENCES` ni `TRIGGER`. Al intentar borrar una tabla, PostgreSQL respondió `BEGIN`, `ERROR:  must be owner of table inscripciones` y `ROLLBACK` (`reto_drop.txt`). En `reto_otras_ordenes.txt`, `DELETE FROM inscripciones` y `UPDATE eventos SET titulo` dieron `permission denied`, `CREATE TABLE` dio `permission denied for schema public` y `CREATE ROLE` también se negó. Con este usuario, las seis peticiones siguen en 401, 200, 200, 403, 200 y 422.
+
+### D6 · Quién crea y cambia las tablas
+Las crea y las cambia `eventosports`, el usuario dueño que crea el contenedor de Compose (`MIGRACION_DATABASE_URL`). Eso pasa con `go run . -migrar`: se conecta como dueño, corre `AutoMigrate` y el índice único, siembra a Ana y Luis si `DEMO_SEED=true` y llama a `datos.PrepararUsuarioAPI`. Esa función crea `eventosports_api` (o le actualiza la clave), le quita todos los permisos y le vuelve a dar solo los de la lista. Si alguien agregó un permiso a mano, la siguiente migración lo borra. `-migrar` también se niega a seguir si `DATABASE_URL` usa al mismo dueño. Las pruebas de integración usan `MIGRACION_DATABASE_URL`, porque crean y borran su propio esquema.
+
+`go run .` ya no corre `AutoMigrate`. Si cambiamos un modelo y arrancamos la API con su usuario sin migrar, la API arranca igual, pero las consultas que usen la columna nueva fallarían con 500 (la columna no existe) hasta que el dueño corra `go run . -migrar`. Esto lo razonamos, no lo probamos. Y si alguien volviera a poner `AutoMigrate` con el usuario de la API, PostgreSQL lo frenaría: crear una tabla da `permission denied for schema public`, y cambiar una existente pide ser dueño, como el `DROP` de `reto_drop.txt`. El orden desde cero es: `docker compose up -d --wait db`, `go run . -migrar` y `go run .`. La migración se probó sobre la base que ya teníamos. **No llegamos a correr `docker compose down -v` para probar desde un volumen vacío**: queda pendiente. En esta rama Compose solo levanta la base (la API con Compose era del taller 11).
+
+### D7 · Lo que esto no frena
+Si quedara una inyección, quien la encuentre tendría los permisos de `eventosports_api`. Podría leer todo lo que la API lee, incluidos los resúmenes bcrypt de `cuentas` y los datos de los usuarios. También podría crear eventos e inscripciones, cambiar el estado de cualquier inscripción, marcar pagos como verificados y cambiar los `cupos` de un evento. Lo que ya no puede: borrar tablas o registros, vaciar tablas, crear tablas o usuarios, cambiar otras columnas, darse más permisos ni tocar la configuración del servidor. Eso lo podía hacer antes, cuando la API se conectaba como `eventosports`, que es superusuario. Tampoco cubre lo que PostgreSQL da a todos por defecto (`PUBLIC`), como conectarse a otras bases del mismo servidor o crear tablas temporales. La defensa principal sigue siendo la consulta con parámetros del punto 1; el mínimo privilegio limita el daño si esa falla.

@@ -1,0 +1,26 @@
+                                                      Access privileges
+ Schema |         Name         |   Type   |         Access privileges         |         Column privileges         | Policies 
+--------+----------------------+----------+-----------------------------------+-----------------------------------+----------
+ public | cuentas              | table    | eventosports=arwdDxt/eventosports+|                                   | 
+        |                      |          | eventosports_api=r/eventosports   |                                   | 
+ public | cuentas_id_seq       | sequence | eventosports=rwU/eventosports     |                                   | 
+ public | eventos              | table    | eventosports=arwdDxt/eventosports+| cupos:                           +| 
+        |                      |          | eventosports_api=ar/eventosports  |   eventosports_api=w/eventosports | 
+ public | eventos_id_seq       | sequence | eventosports=rwU/eventosports    +|                                   | 
+        |                      |          | eventosports_api=U/eventosports   |                                   | 
+ public | inscripciones        | table    | eventosports=arwdDxt/eventosports+| estado:                          +| 
+        |                      |          | eventosports_api=ar/eventosports  |   eventosports_api=w/eventosports | 
+ public | inscripciones_id_seq | sequence | eventosports=rwU/eventosports    +|                                   | 
+        |                      |          | eventosports_api=U/eventosports   |                                   | 
+ public | pagos                | table    | eventosports=arwdDxt/eventosports+| verificado:                      +| 
+        |                      |          | eventosports_api=ar/eventosports  |   eventosports_api=w/eventosports | 
+ public | pagos_id_seq         | sequence | eventosports=rwU/eventosports    +|                                   | 
+        |                      |          | eventosports_api=U/eventosports   |                                   | 
+ public | sedes                | table    | eventosports=arwdDxt/eventosports+|                                   | 
+        |                      |          | eventosports_api=r/eventosports   |                                   | 
+ public | sedes_id_seq         | sequence | eventosports=rwU/eventosports     |                                   | 
+ public | usuarios             | table    | eventosports=arwdDxt/eventosports+|                                   | 
+        |                      |          | eventosports_api=r/eventosports   |                                   | 
+ public | usuarios_id_seq      | sequence | eventosports=rwU/eventosports     |                                   | 
+(12 rows)
+
