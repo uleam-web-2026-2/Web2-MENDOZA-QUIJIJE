@@ -1,0 +1,91 @@
+$ docker compose down -v && docker compose up -d --wait db   (volumen nuevo)
+$ docker exec eventosports-s7-db-1 psql -U eventosports -d eventosports -c '\dt' -c '\du'
+Did not find any relations.
+                               List of roles
+  Role name   |                         Attributes                         
+--------------+------------------------------------------------------------
+ eventosports | Superuser, Create role, Create DB, Replication, Bypass RLS
+
+
+$ go run .   (antes de migrar)
+2026/11/20 00:48:23 no se pudo conectar a PostgreSQL; revise DATABASE_URL y el servicio
+exit status 1
+salida: 1
+
+$ go run . -migrar
+2026/11/20 00:48:24 migración lista: tablas, ejemplos y permisos del usuario de la API
+salida: 0
+
+$ docker exec eventosports-s7-db-1 psql -U eventosports -d eventosports -c '\dt' -c '\du'
+               List of relations
+ Schema |     Name      | Type  |    Owner     
+--------+---------------+-------+--------------
+ public | cuentas       | table | eventosports
+ public | eventos       | table | eventosports
+ public | inscripciones | table | eventosports
+ public | pagos         | table | eventosports
+ public | sedes         | table | eventosports
+ public | usuarios      | table | eventosports
+(6 rows)
+
+                                 List of roles
+    Role name     |                         Attributes                         
+------------------+------------------------------------------------------------
+ eventosports     | Superuser, Create role, Create DB, Replication, Bypass RLS
+ eventosports_api | No inheritance
+
+
+$ go run .   (después de migrar, en otra terminal)
+2026/11/20 00:48:32 EventoSports listo en http://localhost:8080
+
+$ cd docs/hito2_bruno && npx --yes @usebruno/cli@4.3.0 run --env Local --bail
+0_preparar (201 Created) - 10 ms
+Tests
+   ✓ Respuesta 201
+1_sin_token (401 Unauthorized) - 2 ms
+Tests
+   ✓ Respuesta 401
+2_login (200 OK) - 57 ms
+Tests
+   ✓ Respuesta 200
+   ✓ Entrega token
+3_con_token (200 OK) - 12 ms
+Tests
+   ✓ Respuesta 200
+4_rol_sin_permiso (403 Forbidden) - 8 ms
+Tests
+   ✓ Respuesta 403
+5_rol_correcto (200 OK) - 12 ms
+Tests
+   ✓ Respuesta 200
+   ✓ Queda confirmada
+6_transicion_prohibida (422 Unprocessable Entity) - 8 ms
+Tests
+   ✓ Respuesta 422
+
+📊 Execution Summary
+┌───────────────┬──────────────┐
+│ Metric        │    Result    │
+├───────────────┼──────────────┤
+│ Status        │    ✓ PASS    │
+├───────────────┼──────────────┤
+│ Requests      │ 7 (7 Passed) │
+├───────────────┼──────────────┤
+│ Tests         │     9/9      │
+├───────────────┼──────────────┤
+│ Assertions    │     0/0      │
+├───────────────┼──────────────┤
+│ Duration (ms) │     1326     │
+└───────────────┴──────────────┘
+
+$ docker exec eventosports-s7-db-1 psql -U eventosports_api -d eventosports -c begin -c 'drop table inscripciones' -c rollback
+BEGIN
+ROLLBACK
+ERROR:  must be owner of table inscripciones
+
+$ conexiones abiertas a la base eventosports (sin contar esta consulta)
+     usename      | count 
+------------------+-------
+ eventosports_api |     1
+(1 row)
+

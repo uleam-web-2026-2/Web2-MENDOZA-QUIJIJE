@@ -25,3 +25,9 @@ creó `eventosports_api` con los permisos de `servidor/internal/datos/permisos.g
 se conectó con `eventosports_api`: `pg_stat_activity` mostró una conexión de ese usuario y ninguna
 de `eventosports`. La misma colección dio los mismos códigos y ninguna respuesta 5xx. Salida:
 [`bruno_reto.txt`](bruno_reto.txt).
+
+**Desde cero.** Con `docker compose down -v` y `docker compose up -d --wait db`, después `go run . -migrar`
+y `go run .`, la colección volvió a dar 401, 200, 200, 403, 200 y 422:
+[`reto_desde_cero.txt`](reto_desde_cero.txt). En ese archivo, el `ERROR` del `DROP` sale después del
+`ROLLBACK` porque psql escribe los errores por otra salida (stderr) y se mezclaron al guardar. En
+[`reto_drop.txt`](reto_drop.txt) salen en orden.
