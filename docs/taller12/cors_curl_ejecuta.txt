@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Vary: Origin
+Date: Fri, 20 Nov 2026 05:21:08 GMT
+Content-Length: 104
+
+{"id":3,"evento_id":29,"jugador_id":1,"estado":"confirmada","creado":"2026-11-20T00:20:59.40259-05:00"}

@@ -7,6 +7,8 @@ import (
 	"eventosports/internal/negocio"
 	"eventosports/internal/sesion"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -38,6 +40,17 @@ func main() {
 		}
 	}
 	r := chi.NewRouter()
+	// CORS arriba de todo: responde las peticiones previas (OPTIONS), que
+	// no tienen manejador ni token. Mínimo privilegio: se nombra el front,
+	// no "*", y solo los métodos que usa la API (no hay PUT ni DELETE).
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"http://localhost:5173"},
+		AllowedMethods: []string{"GET", "POST", "PATCH"},
+		AllowedHeaders: []string{"Authorization", "Content-Type"},
+		MaxAge:         300, // segundos que el navegador recuerda la respuesta
+	}))
+	// Registro de cada petición en la terminal (debajo de CORS: las previas no se anotan).
+	r.Use(middleware.Logger)
 	tokens := sesion.NuevosTokens(c.Secreto)
 	servicio := &negocio.Servicio{Almacen: &datos.AlmacenGORM{DB: db}}
 	(&eventosports.Manejador{Servicio: servicio, Sesion: &sesion.Manejador{DB: db, Tokens: tokens}}).Rutas(r, tokens)
