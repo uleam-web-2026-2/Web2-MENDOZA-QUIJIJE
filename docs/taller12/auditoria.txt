@@ -1,0 +1,27 @@
+servidor/internal/datos/almacen_gorm.go:36:			db = db.Where(campo.nombre+" = ?", campo.valor)
+servidor/internal/datos/almacen_gorm.go:40:		db = db.Where("sede_id IN (?)", q.db.Model(&modelo.Sede{}).Select("id").Where("LOWER(ciudad) = LOWER(?)", f.Ciudad))
+servidor/internal/datos/almacen_gorm.go:43:	err := db.Order("id").Find(&v).Error
+servidor/internal/datos/almacen_gorm.go:48:	err := q.db.First(&v, id).Error
+servidor/internal/datos/almacen_gorm.go:53:	err := q.db.First(&v, id).Error
+servidor/internal/datos/almacen_gorm.go:58:	err := q.db.First(&v, id).Error
+servidor/internal/datos/almacen_gorm.go:63:	err := q.db.First(&v, id).Error
+servidor/internal/datos/almacen_gorm.go:68:	err := q.db.Model(&modelo.Inscripcion{}).Where("evento_id = ? AND estado = ?", id, "confirmada").Count(&n).Error
+servidor/internal/datos/almacen_gorm.go:73:	err := q.db.Where("evento_id = ?", id).Order("id").Find(&v).Error
+servidor/internal/datos/almacen_gorm.go:78:	err := q.db.Where("evento_id = ? AND jugador_id = ?", evento, jugador).Order("id DESC").First(&v).Error
+servidor/internal/datos/almacen_gorm.go:83:	err := q.db.Where("inscripcion_id = ?", id).Order("id DESC").First(&v).Error
+servidor/internal/datos/almacen_gorm.go:89:	err := q.db.Clauses(clause.Locking{Strength: "UPDATE"}).First(&v, id).Error
+servidor/internal/datos/almacen_gorm.go:94:	err := q.db.Clauses(clause.Locking{Strength: "UPDATE"}).First(&v, id).Error
+servidor/internal/datos/almacen_gorm.go:99:	err := q.db.Model(&modelo.Inscripcion{}).Where("evento_id = ? AND jugador_id = ? AND estado <> ?", evento, jugador, "cancelada").Count(&n).Error
+servidor/internal/datos/almacen_gorm.go:107:	return normalizar(q.db.Model(&modelo.Pago{}).Where("id = ?", id).Update("verificado", true).Error)
+servidor/internal/datos/base.go:16:	return db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS inscripcion_activa_unica ON inscripciones (evento_id, jugador_id) WHERE estado <> 'cancelada'").Error
+servidor/internal/datos/base.go:29:			if err := tx.Where("nombre = ?", nombre).First(&cuenta).Error; err != nil {
+servidor/internal/datos/base.go:32:			perfil := modelo.Usuario{ID: cuenta.ID, Nombre: cuenta.Nombre, Correo: nombre + "@eventosports.example", Rol: cuenta.Rol}
+servidor/internal/datos/base.go:38:		if err := tx.Where("nombre = ?", "luis").First(&organizador).Error; err != nil {
+servidor/internal/datos/base.go:55:			if err := tx.Exec("SELECT setval(pg_get_serial_sequence('" + tabla + "', 'id'), COALESCE((SELECT MAX(id) FROM " + tabla + "), 1))").Error; err != nil {
+servidor/internal/eventosports/manejadores.go:74:	q := r.URL.Query()
+servidor/internal/eventosports/rutas.go:24:	r.Group(func(r chi.Router) {
+servidor/internal/negocio/estados.go:37:		return rechazar(Regla, "transicion prohibida: de "+i.Estado+" no se pasa a "+c.Estado)
+servidor/internal/sesion/guardia.go:60:					"solo el rol "+rol+" puede hacer esto")
+servidor/internal/sesion/usuarios.go:55:		db.Where("nombre = ?", e.nombre).Limit(1).Find(&u)
+servidor/internal/sesion/usuarios.go:86:	err := m.DB.Where("nombre = ?", pedido.Usuario).Limit(1).Find(&u).Error
+servidor/main.go:44:	servidor := &http.Server{Addr: ":" + c.Puerto, Handler: r, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 15 * time.Second}

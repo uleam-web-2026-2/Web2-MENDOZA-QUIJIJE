@@ -1,0 +1,31 @@
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Fri, 20 Nov 2026 05:19:12 GMT
+Content-Length: 1150
+
+[{"id":25,"titulo":"Futbol de demostracion","deporte":"futbol","nivel":"casual","inicio":"2026-12-20T00:04:50.236928-05:00","cupos":14,"precio":2.5,"organizador_id":2,"sede_id":3,"sede":{"id":3,"nombre":"Cancha El Palmar","ciudad":"Manta","referencia":"Junto al parque"},"cupos_libres":14},{"id":26,"titulo":"Padel gratuito de demostracion","deporte":"padel","nivel":"amateur","inicio":"2026-12-21T00:04:50.268334-05:00","cupos":8,"precio":0,"organizador_id":2,"sede_id":3,"sede":{"id":3,"nombre":"Cancha El Palmar","ciudad":"Manta","referencia":"Junto al parque"},"cupos_libres":8},{"id":27,"titulo":"Hito 2 1795151831578","deporte":"futbol","nivel":"casual","inicio":"2026-11-27T00:17:11.578-05:00","cupos":14,"precio":2.5,"organizador_id":2,"sede_id":3,"sede":{"id":3,"nombre":"Cancha El Palmar","ciudad":"Manta","referencia":"Junto al parque"},"cupos_libres":13},{"id":28,"titulo":"Hito 2 1795151831591","deporte":"futbol","nivel":"casual","inicio":"2026-11-27T00:17:11.591-05:00","cupos":14,"precio":0,"organizador_id":2,"sede_id":3,"sede":{"id":3,"nombre":"Cancha El Palmar","ciudad":"Manta","referencia":"Junto al parque"},"cupos_libres":14}]
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Fri, 20 Nov 2026 05:19:12 GMT
+Content-Length: 3
+
+[]
+
+
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/json; charset=utf-8
+Date: Fri, 20 Nov 2026 05:19:12 GMT
+Content-Length: 37
+
+{"error":"filtro fuera de la lista"}
+
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+Date: Fri, 20 Nov 2026 05:19:12 GMT
+Content-Length: 46
+
+{"error":"el id debe ser un entero positivo"}
+
