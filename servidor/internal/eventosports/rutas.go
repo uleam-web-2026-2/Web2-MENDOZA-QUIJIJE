@@ -20,7 +20,13 @@ func (m *Manejador) Rutas(r chi.Router, tokens *sesion.Tokens) {
 			next.ServeHTTP(w, r)
 		})
 	}).Get("/eventos/{id}", m.verEvento)
-	r.Post("/login", m.Sesion.Login)
+	// Pública, pero con límite: solo esta ruta, con r.With. Con r.Use, las
+	// seis peticiones de Bruno chocarían con el tope.
+	if m.LimiteLogin != nil {
+		r.With(m.LimiteLogin).Post("/login", m.Sesion.Login)
+	} else {
+		r.Post("/login", m.Sesion.Login)
+	}
 	r.Group(func(r chi.Router) {
 		r.Use(tokens.Autenticar)
 		r.With(sesion.SoloRol(sesion.RolOrganizador)).Post("/eventos", m.crearEvento)

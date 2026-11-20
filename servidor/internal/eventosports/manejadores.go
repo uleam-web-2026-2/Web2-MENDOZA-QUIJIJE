@@ -14,6 +14,9 @@ import (
 type Manejador struct {
 	Servicio *negocio.Servicio
 	Sesion   *sesion.Manejador
+	// LimiteLogin va solo delante de POST /login (taller 12, punto 3).
+	// main.go pone el de httprate; si es nil, el login queda sin límite.
+	LimiteLogin func(http.Handler) http.Handler
 }
 
 func responder(w http.ResponseWriter, codigo int, cuerpo any) {

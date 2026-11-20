@@ -63,3 +63,32 @@ Los IDs y los tokens se conservan únicamente en variables de ejecución `bru.se
 ## Uso de IA
 
 La separación en capas, las pruebas, el contrato, los scripts, la colección y esta documentación se prepararon con asistencia de Codex. Los archivos de tokens y guardia provienen del material docente. La pareja debe revisar las decisiones y explicar el código con sus propias razones. No se fabricaron commits de ningún integrante ni se hizo push automáticamente.
+
+## Semana 12 · la seguridad de la API
+
+### D1 · Lo que encontramos y cerramos
+La búsqueda con `docs/taller12/patrones.txt` dio 27 líneas: 21 arman SQL y 6 no (un grupo de rutas, dos mensajes de error, el correo de la siembra, la lectura de `r.URL.Query()` y la dirección del servidor). El texto del cliente llega al SQL por cuatro lugares: `?deporte=`, `?nivel=`, `?ciudad=` y el `usuario` del login. Los cuatro van como parámetro (`?`), y `deporte` y `nivel` además se comparan con una lista y responden 422 si no están. Los `{id}` se convierten con `strconv.ParseUint` antes de la consulta, y si no son números responden 400. El único `+` dentro de un SQL (`datos/base.go:55`) pega nombres de tabla fijos del código en la siembra, no texto del cliente. No había nada vulnerable, así que no se cambió código. La fila por fila está en `docs/taller12/auditoria.md`.
+
+La prueba del paso 1.4 (`inyeccion.txt`): `?ciudad=Manta` devolvió 4 eventos; `?ciudad=' OR 1=1 --` devolvió `[]`, porque PostgreSQL buscó una ciudad que se llama literalmente así; `?deporte=' OR 1=1 --` dio 422; y `/inscripciones/1%20OR%201=1` dio 400. El mismo ataque quedó como prueba automática en `internal/eventosports/inyeccion_test.go`.
+
+### D2 · El origen que puede leer nuestras respuestas
+Nombramos `http://localhost:5173`, donde va a correr el front con Vite (todavía no lo tenemos). No usamos `"*"` porque cualquier página que abra un usuario podría llamar a la API desde su navegador y leer las respuestas. Con el origen nombrado, solo nuestro front recibe ese permiso. `AllowedMethods` lleva solo GET, POST y PATCH, los métodos que usa la API.
+
+CORS va justo debajo de `chi.NewRouter()`, antes que todo, porque la petición previa (`OPTIONS`) no trae token: si pasara antes por el guardia recibiría 401, y metida en un `r.With` de las rutas daría 405 porque `OPTIONS` no tiene ruta propia. Por eso tampoco aparece en el registro de `middleware.Logger`, que va debajo: CORS la responde antes.
+
+Desde `http://malo.example`, la previa respondió 200 sin ninguna cabecera `Access-Control-…`, y el PATCH hecho con curl desde ese origen se ejecutó igual: 200 y la inscripción 3 quedó `confirmada` (`cors_curl_ejecuta.txt`). CORS no es autenticación: lo aplica el navegador y curl o Bruno lo ignoran. Lo que protege el cambio de estado son el token y el rol. Cuando publiquemos el front, hay que agregar su origen exacto (con `https`, el dominio y sin barra final), mejor desde una variable de entorno que escrito en el código.
+
+### D3 · El límite del login
+El tope es de 5 intentos por minuto por IP, con la ventana deslizante de `httprate`. Una persona que se equivoca de clave lo hace una, dos o tres veces. Una vuelta de la colección de Bruno inicia sesión tres veces y entra en el tope. En cambio, sin límite, cada intento cuesta unos 65 ms de bcrypt, y un atacante podía probar cientos de claves por minuto. Con el tope, una IP prueba como mucho 5 por minuto.
+
+Va solo en `POST /login`, con `r.With`, porque es la única ruta donde se adivinan contraseñas y la más cara (bcrypt). Con `r.Use` frenaría también las rutas normales, y las seis peticiones chocarían con el tope. Como la ruta está en `internal/eventosports/rutas.go`, el límite llega como un campo `LimiteLogin` del manejador: `main.go` pone el de `httprate` y las pruebas pueden armar el router sin él.
+
+En la ráfaga (`rafaga.txt`), los cinco primeros intentos dieron 401 con `X-Ratelimit-Remaining` de 4 a 0. El primer 429 llegó en el sexto, con `Retry-After: 60`, y el séptimo dio lo mismo. En el registro, cada 401 tardó entre 64 y 79 ms y cada 429 salió en `0s`: lo responde el middleware sin llegar a bcrypt. La prueba `internal/eventosports/limite_test.go` comprueba lo mismo, y además que `GET /eventos` sigue respondiendo con el login frenado.
+
+### D4 · Detrás de un proxy
+`ClientIPFromRemoteAddr` saca la IP de `r.RemoteAddr`, la dirección de la conexión TCP (sin el puerto), y no lee ninguna cabecera. Por eso en el registro aparece `from ::1` en vez de `[::1]:60358`. Si la API queda detrás de un proxy (nginx, el balanceador de la nube), todas las conexiones llegan desde la IP del proxy. Todos los usuarios compartirían una sola cuenta, y cinco intentos fallidos de cualquiera bloquearían el login de todos durante un minuto.
+
+No se puede confiar en `X-Forwarded-For` sin más porque la escribe el cliente: un atacante pondría un valor distinto en cada petición y nunca llegaría al tope. Lo correcto es aceptarla solo cuando la conexión viene del proxy que conocemos, y tomar la IP que agregó ese proxy. Chi 5.5.0 lo trae: `middleware.ClientIPFromXFF("rango/del/proxy")`, o `ClientIPFromXFFTrustedProxies(1)` si hay exactamente un proxy delante y la red garantiza que nadie más llega a la API.
+
+### Uso de IA en la semana 12
+Claude Code (Claude Opus 5.5) diagnosticó la conexión a PostgreSQL, corrió las búsquedas, las pruebas, la ráfaga y las peticiones de Bruno, escribió el código de CORS, del límite y de las pruebas nuevas, y redactó la auditoría y D1 a D4 a partir de esas salidas. Carlos aprobó cada comando. Las evidencias de `docs/taller12/` son las salidas tal como las dieron los comandos. La pareja tiene que revisar estas decisiones para poder defenderlas sin IA en el hito 3.

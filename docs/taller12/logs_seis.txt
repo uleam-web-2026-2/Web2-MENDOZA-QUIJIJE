@@ -1,0 +1,14 @@
+2026/11/20 00:23:07 "POST http://localhost:8080/login HTTP/1.1" from ::1 - 200 196B in 63.0671ms
+2026/11/20 00:23:07 "POST http://localhost:8080/login HTTP/1.1" from ::1 - 200 202B in 63.1769ms
+2026/11/20 00:23:07 "POST http://localhost:8080/eventos HTTP/1.1" from ::1 - 201 279B in 11.9876ms
+2026/11/20 00:23:07 "POST http://localhost:8080/eventos HTTP/1.1" from ::1 - 201 277B in 6.2261ms
+2026/11/20 00:23:07 "POST http://localhost:8080/eventos/31/inscripciones HTTP/1.1" from ::1 - 201 105B in 10.071ms
+2026/11/20 00:23:07 "PATCH http://localhost:8080/inscripciones/4/estado HTTP/1.1" from ::1 - 200 104B in 9.2884ms
+2026/11/20 00:23:07 "POST http://localhost:8080/eventos/30/inscripciones HTTP/1.1" from ::1 - 201 105B in 6.664ms
+2026/11/20 00:23:08 "PATCH http://localhost:8080/inscripciones/5/estado HTTP/1.1" from ::1 - 200 112B in 7.336ms
+2026/11/20 00:23:08 "GET http://localhost:8080/eventos/30/inscripciones HTTP/1.1" from ::1 - 401 58B in 0s
+2026/11/20 00:23:08 "POST http://localhost:8080/login HTTP/1.1" from ::1 - 200 202B in 62.8973ms
+2026/11/20 00:23:08 "GET http://localhost:8080/eventos/30/inscripciones HTTP/1.1" from ::1 - 200 327B in 7.7385ms
+2026/11/20 00:23:08 "PATCH http://localhost:8080/inscripciones/5/estado HTTP/1.1" from ::1 - 403 50B in 7.7305ms
+2026/11/20 00:23:08 "PATCH http://localhost:8080/inscripciones/5/estado HTTP/1.1" from ::1 - 200 104B in 9.7263ms
+2026/11/20 00:23:08 "PATCH http://localhost:8080/inscripciones/4/estado HTTP/1.1" from ::1 - 422 71B in 5.8945ms
