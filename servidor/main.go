@@ -67,7 +67,9 @@ func main() {
 	servicio := &negocio.Servicio{Almacen: &datos.AlmacenGORM{DB: db}}
 	// Los avisos: el servicio avisa al jugador cuando cambia su inscripción.
 	// GET /ws queda en Rutas, fuera del guardia (el token va en la dirección).
-	avisos := eventosports.NuevosAvisos(tokens, origenFront)
+	// Reto: el rol que administra se decide aquí, no en el servicio; las
+	// inscripciones nuevas les llegan a los organizadores conectados.
+	avisos := eventosports.NuevosAvisos(tokens, origenFront, sesion.RolOrganizador)
 	servicio.AvisarCon(avisos)
 	// Login: 5 intentos por minuto por IP; el sexto recibe 429 con Retry-After.
 	limiteLogin := httprate.LimitBy(5, time.Minute, porIP)

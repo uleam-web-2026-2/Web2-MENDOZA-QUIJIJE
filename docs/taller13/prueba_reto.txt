@@ -1,0 +1,12 @@
+=== RUN   TestRetoAvisaALosQueAdministran
+--- PASS: TestRetoAvisaALosQueAdministran (1.15s)
+=== RUN   TestRetoElAvisoDelDuenoSigueSoloParaElDueno
+--- PASS: TestRetoElAvisoDelDuenoSigueSoloParaElDueno (1.60s)
+PASS
+ok  	eventosports/internal/eventosports	3.136s
+=== RUN   TestRetoCrearInscripcionAvisaAlNegocio
+--- PASS: TestRetoCrearInscripcionAvisaAlNegocio (0.00s)
+=== RUN   TestRetoInscripcionRechazadaNoAvisa
+--- PASS: TestRetoInscripcionRechazadaNoAvisa (0.00s)
+PASS
+ok  	eventosports/internal/negocio	1.340s

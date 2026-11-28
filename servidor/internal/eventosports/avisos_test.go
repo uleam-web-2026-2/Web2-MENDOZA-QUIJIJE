@@ -29,7 +29,7 @@ var (
 // Devuelve su dirección ws:// y los avisos, para enviar.
 func servidorDeAvisos(t *testing.T) (string, *Avisos) {
 	t.Helper()
-	avisos := NuevosAvisos(tokensDePrueba, origenDePrueba)
+	avisos := NuevosAvisos(tokensDePrueba, origenDePrueba, sesion.RolOrganizador)
 	r := chi.NewRouter()
 	(&Manejador{Servicio: &negocio.Servicio{}, Sesion: &sesion.Manejador{Tokens: tokensDePrueba}, Avisos: avisos}).Rutas(r, tokensDePrueba)
 	srv := httptest.NewServer(r)
@@ -88,7 +88,7 @@ func TestWebSocketDesdeOtroOrigenResponde403(t *testing.T) {
 // Conectar, no el del guardia: /ws está fuera del grupo de Autenticar.
 func TestWebSocketFueraDelGuardia(t *testing.T) {
 	r := chi.NewRouter()
-	(&Manejador{Servicio: &negocio.Servicio{}, Sesion: &sesion.Manejador{Tokens: tokensDePrueba}, Avisos: NuevosAvisos(tokensDePrueba, origenDePrueba)}).Rutas(r, tokensDePrueba)
+	(&Manejador{Servicio: &negocio.Servicio{}, Sesion: &sesion.Manejador{Tokens: tokensDePrueba}, Avisos: NuevosAvisos(tokensDePrueba, origenDePrueba, sesion.RolOrganizador)}).Rutas(r, tokensDePrueba)
 	rec := llamar(r, "GET", "/ws?token=basura", "", "")
 	esperar(t, rec, http.StatusUnauthorized)
 	if !strings.Contains(rec.Body.String(), "sin sesión") {

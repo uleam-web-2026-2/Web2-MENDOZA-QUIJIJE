@@ -2,12 +2,12 @@
 
 | Petición | Antes (taller 12) | Con el WebSocket | Con el reto |
 | --- | --- | --- | --- |
-| 1 sin token | 401 | 401 |  |
-| 2 login | 200 | 200 |  |
-| 3 con token | 200 | 200 |  |
-| 4 rol sin permiso | 403 | 403 |  |
-| 5 cambio permitido | 200 | 200 |  |
-| 6 transición prohibida | 422 | 422 |  |
+| 1 sin token | 401 | 401 | 401 |
+| 2 login | 200 | 200 | 200 |
+| 3 con token | 200 | 200 | 200 |
+| 4 rol sin permiso | 403 | 403 | 403 |
+| 5 cambio permitido | 200 | 200 | 200 |
+| 6 transición prohibida | 422 | 422 | 422 |
 
 La columna «Con el reto» se llena solo si hicieron el reto.
 Antes de cada vuelta, el servidor se arrancó otra vez: el límite del taller 12
@@ -24,3 +24,9 @@ servicio que avisa), compilado con `go build` y arrancado de nuevo en el 8080, y
 Ningún código cambió. El `PATCH` de la petición 5 ahora además llama a `Avisos.Enviar` para el
 jugador dueño; como nadie estaba conectado por `/ws`, el aviso no fue a ningún canal y la respuesta
 siguió igual. Salida: [`bruno_con_websocket.txt`](bruno_con_websocket.txt).
+
+**Con el reto.** El mismo día, con `go run .` arrancado de nuevo sobre el código del reto
+(`AvisarAlNegocio` en `CrearInscripcion` y el rol de cada conexión en `Avisos`), y la misma colección.
+Ningún código cambió. La petición 0 crea inscripciones, que ahora además llaman a
+`Avisos.AvisarAlNegocio`; sin organizadores conectados por `/ws`, el aviso no fue a ningún canal.
+Salida: [`bruno_reto.txt`](bruno_reto.txt).

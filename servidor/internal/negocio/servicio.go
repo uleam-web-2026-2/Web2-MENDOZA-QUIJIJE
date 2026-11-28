@@ -108,7 +108,16 @@ func (s *Servicio) CrearInscripcion(ctx context.Context, id uint, a Actor) (mode
 		nueva = modelo.Inscripcion{EventoID: id, JugadorID: a.ID, Estado: "reservada", Creado: s.reloj()}
 		return tx.CrearInscripcion(&nueva)
 	})
-	return nueva, err
+	if err != nil {
+		return nueva, err
+	}
+	// Reto: lo nuevo, al negocio. Después del COMMIT, como en CambiarEstado.
+	// El servicio solo dice «hay una inscripción nueva»; a qué rol le llega
+	// lo decide el Avisador, no el servicio.
+	if s.avisos != nil {
+		s.avisos.AvisarAlNegocio(Aviso{Tipo: "inscripcion_nueva", ID: nueva.ID, Estado: nueva.Estado, EventoID: nueva.EventoID})
+	}
+	return nueva, nil
 }
 func (s *Servicio) VerInscripcion(ctx context.Context, id uint, a Actor) (modelo.Inscripcion, error) {
 	q := s.Almacen.ConContexto(ctx)

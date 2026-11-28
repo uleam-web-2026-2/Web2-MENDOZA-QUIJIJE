@@ -136,3 +136,17 @@ El origen sirve aunque haya token porque el navegador manda solo el `Origin` de 
 
 ### Uso de IA en la semana 13
 Claude Code (Claude Opus 5.5) adaptó el código del paquete del taller a EventoSports: `aviso.go`, el aviso en `CambiarEstado`, `avisos.go`, `/ws` en `Rutas` y sus pruebas, y eva en la semilla. También corrió las pruebas, los `curl` y las peticiones de Bruno, y redactó D1 a D3 a partir de esas salidas. Las evidencias de `docs/taller13/` son las salidas tal como las dieron los comandos. La pareja tiene que revisar estas decisiones para poder defenderlas sin IA en el hito 3.
+
+## Semana 13 · reto: lo nuevo, al negocio
+
+### D4 · Cómo sabe a quién avisar
+El rol de cada conexión sale del **token**: `Conectar` ya lo lee con `tokens.Leer` antes de `Accept`, y ahora guarda `s.Rol` junto con el canal (`conexion{rol, canal}` en `servidor/internal/eventosports/avisos.go`). No sale de nada que mande el cliente: el rol va firmado dentro del token, y si alguien lo cambia, la firma no coincide y `/ws` responde 401.
+
+Qué rol se entera **se decide en `Avisos`, configurado desde `main.go`**, no en el servicio. `negocio.Servicio.CrearInscripcion`, después del COMMIT, solo llama a `AvisarAlNegocio(Aviso{Tipo: "inscripcion_nueva", ID, Estado, EventoID})`: dice qué pasó, no a quién. `main.go` arma `NuevosAvisos(tokens, origenFront, sesion.RolOrganizador)`, y `AvisarAlNegocio` escribe solo en las conexiones con ese rol. Así el servicio no sabe de WebSocket ni de roles de transporte (restricción 4), y el filtro está en el servidor: un jugador nunca recibe el aviso para descartarlo él (ni ana, que fue quien se inscribió). Lo comprueban `TestRetoAvisaALosQueAdministran` (luis y marta, organizadores, lo reciben; ana y eva no) y `TestRetoElAvisoDelDuenoSigueSoloParaElDueno` (el aviso de `CambiarEstado` sigue llegando solo al jugador dueño). Lo decidimos así porque «quién administra» es una regla del producto que puede cambiar (por ejemplo, un rol de staff de la cancha) sin tocar el caso de uso.
+
+Una limitación que vemos en EventoSports: hay **varios organizadores**, y cada uno solo puede ver las inscripciones de sus eventos (`ListarInscripciones` responde 403 a otro organizador). Con lo que pide el reto, el aviso `inscripcion_nueva` les llega a todos los organizadores conectados. El aviso lleva solo `id`, `estado` y `evento_id`, sin datos del jugador, y si otro organizador pide `GET /inscripciones/{id}` sigue recibiendo 403, pero igual se entera de que hubo una inscripción en un evento ajeno. El siguiente paso sería avisar solo al organizador del evento (`e.OrganizadorID`) con `Enviar`, que ya existe.
+
+Si a alguien le cambian el rol con la conexión abierta, la conexión sigue con el rol que traía el token al conectar: `Avisos` no vuelve a leer la base. Hasta que se cierre la pestaña, seguiría recibiendo (o no) los avisos del rol viejo. Al reconectar, el token que tenía (válido una hora) todavía trae el rol viejo; solo con un login nuevo el token trae el rol nuevo. Para cortar eso habría que cerrar sus conexiones al cambiarle el rol, o volver a leer el rol en cada aviso. Esto lo razonamos, no lo probamos.
+
+### Uso de IA en el reto
+Claude Code (Claude Opus 5.5) escribió `AvisarAlNegocio`, el rol por conexión en `Avisos`, las pruebas `TestReto…` y D4, y corrió las pruebas y Bruno. La pareja tiene que revisar D4 para poder explicar en la defensa dónde se decide quién recibe cada aviso.

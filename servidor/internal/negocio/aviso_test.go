@@ -10,13 +10,18 @@ import (
 
 // avisadorFalso anota a quién se avisó, sin WebSocket.
 type avisadorFalso struct {
-	quien  []uint
-	avisos []Aviso
+	quien   []uint
+	avisos  []Aviso
+	negocio []Aviso // reto: lo que se le contó a quienes administran
 }
 
 func (a *avisadorFalso) Enviar(usuarioID uint, av Aviso) {
 	a.quien = append(a.quien, usuarioID)
 	a.avisos = append(a.avisos, av)
+}
+
+func (a *avisadorFalso) AvisarAlNegocio(av Aviso) {
+	a.negocio = append(a.negocio, av)
 }
 
 // almacenFalso cumple Almacen sin base de datos: Transaccion corre la

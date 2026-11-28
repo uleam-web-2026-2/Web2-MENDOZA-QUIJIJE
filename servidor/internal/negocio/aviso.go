@@ -4,9 +4,10 @@ package negocio
 // Sale como JSON por el WebSocket: el hito 3 pide al menos tipo e id.
 // En EventoSports el registro es la inscripción: ID es el de la inscripción.
 type Aviso struct {
-	Tipo   string `json:"tipo"`
-	ID     uint   `json:"id"`
-	Estado string `json:"estado"`
+	Tipo     string `json:"tipo"`
+	ID       uint   `json:"id"`
+	Estado   string `json:"estado"`
+	EventoID uint   `json:"evento_id,omitempty"` // reto: a qué evento se inscribieron
 }
 
 // Avisador es lo que el servicio necesita para avisar. El servicio no
@@ -19,4 +20,8 @@ type Aviso struct {
 // avisos son el mismo dato, y el compilador no deja mezclarlos.
 type Avisador interface {
 	Enviar(usuarioID uint, av Aviso)
+	// AvisarAlNegocio cuenta algo nuevo a quienes administran (reto del
+	// taller 13). El servicio no nombra ese rol: lo decide quien implementa
+	// el Avisador, con lo que le da main.go.
+	AvisarAlNegocio(av Aviso)
 }
