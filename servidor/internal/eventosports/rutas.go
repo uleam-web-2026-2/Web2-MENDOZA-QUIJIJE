@@ -27,6 +27,12 @@ func (m *Manejador) Rutas(r chi.Router, tokens *sesion.Tokens) {
 	} else {
 		r.Post("/login", m.Sesion.Login)
 	}
+	// WebSocket de avisos: FUERA del grupo del guardia. Autenticar busca la
+	// cabecera Authorization, que el navegador no deja poner en un
+	// WebSocket; Conectar revisa el token de la dirección antes de Accept.
+	if m.Avisos != nil {
+		r.Get("/ws", m.Avisos.Conectar)
+	}
 	r.Group(func(r chi.Router) {
 		r.Use(tokens.Autenticar)
 		r.With(sesion.SoloRol(sesion.RolOrganizador)).Post("/eventos", m.crearEvento)

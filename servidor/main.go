@@ -19,6 +19,10 @@ import (
 	"time"
 )
 
+// origenFront es el único front que puede leer las respuestas (CORS) y
+// abrir el WebSocket. Se escribe una vez, igual que en la barra del navegador.
+const origenFront = "http://localhost:5173"
+
 func main() {
 	migrar := flag.Bool("migrar", false, "con el dueño de las tablas: migra, siembra y da permisos al usuario de la API; después termina")
 	flag.Parse()
@@ -51,7 +55,7 @@ func main() {
 	// no tienen manejador ni token. Mínimo privilegio: se nombra el front,
 	// no "*", y solo los métodos que usa la API (no hay PUT ni DELETE).
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"http://localhost:5173"},
+		AllowedOrigins: []string{origenFront},
 		AllowedMethods: []string{"GET", "POST", "PATCH"},
 		AllowedHeaders: []string{"Authorization", "Content-Type"},
 		MaxAge:         300, // segundos que el navegador recuerda la respuesta
@@ -61,9 +65,13 @@ func main() {
 	r.Use(middleware.Logger)
 	tokens := sesion.NuevosTokens(c.Secreto)
 	servicio := &negocio.Servicio{Almacen: &datos.AlmacenGORM{DB: db}}
+	// Los avisos: el servicio avisa al jugador cuando cambia su inscripción.
+	// GET /ws queda en Rutas, fuera del guardia (el token va en la dirección).
+	avisos := eventosports.NuevosAvisos(tokens, origenFront)
+	servicio.AvisarCon(avisos)
 	// Login: 5 intentos por minuto por IP; el sexto recibe 429 con Retry-After.
 	limiteLogin := httprate.LimitBy(5, time.Minute, porIP)
-	(&eventosports.Manejador{Servicio: servicio, Sesion: &sesion.Manejador{DB: db, Tokens: tokens}, LimiteLogin: limiteLogin}).Rutas(r, tokens)
+	(&eventosports.Manejador{Servicio: servicio, Sesion: &sesion.Manejador{DB: db, Tokens: tokens}, LimiteLogin: limiteLogin, Avisos: avisos}).Rutas(r, tokens)
 	servidor := &http.Server{Addr: ":" + c.Puerto, Handler: r, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 15 * time.Second}
 	log.Printf("EventoSports listo en http://localhost:%s", c.Puerto)
 	log.Fatal(servidor.ListenAndServe())

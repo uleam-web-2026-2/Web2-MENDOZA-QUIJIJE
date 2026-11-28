@@ -17,6 +17,8 @@ type Manejador struct {
 	// LimiteLogin va solo delante de POST /login (taller 12, punto 3).
 	// main.go pone el de httprate; si es nil, el login queda sin límite.
 	LimiteLogin func(http.Handler) http.Handler
+	// Avisos atiende GET /ws (taller 13). Si es nil, la ruta no existe.
+	Avisos *Avisos
 }
 
 func responder(w http.ResponseWriter, codigo int, cuerpo any) {

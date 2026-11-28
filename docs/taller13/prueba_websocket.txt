@@ -1,0 +1,10 @@
+=== RUN   TestWebSocketSinTokenResponde401
+--- PASS: TestWebSocketSinTokenResponde401 (0.00s)
+=== RUN   TestWebSocketDesdeOtroOrigenResponde403
+--- PASS: TestWebSocketDesdeOtroOrigenResponde403 (0.00s)
+=== RUN   TestWebSocketFueraDelGuardia
+--- PASS: TestWebSocketFueraDelGuardia (0.00s)
+=== RUN   TestElAvisoLlegaSoloAlJugadorDueno
+--- PASS: TestElAvisoLlegaSoloAlJugadorDueno (0.60s)
+PASS
+ok  	eventosports/internal/eventosports	0.837s
