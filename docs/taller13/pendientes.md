@@ -24,3 +24,16 @@ luis a `confirmada` (201, 200, 200). En la pestaña de ana aparecieron, sin reca
 `estado_cambiado · registro 10 → pago_por_verificar` y `→ confirmada`. En la de eva, nada. Ese panel
 muestra una pestaña a la vez, así que no permite la captura de dos ventanas juntas. Falta guardar la
 captura y copiar el registro del servidor de esta vuelta a `logs_avisos.txt`.
+
+**El registro de esa vuelta.** [`logs_avisos.txt`](logs_avisos.txt) tiene las líneas del servidor de
+23:05:04 a 23:05:59, copiadas del registro de `go run .` y con el token borrado con el `sed` de
+`fase3/borrar_token.txt`. Los `POST /login` de 23:05:04 y 23:05:14 son las pestañas de ana y eva;
+los de 23:05:23 y 23:05:24 son luis y ana desde curl. Después vienen el `POST` del evento 36, el
+`POST` de la inscripción 10 con el token de ana y los dos `PATCH`. A las 23:05:59 el panel del
+navegador se cerró, y por eso aparecen juntas las líneas `GET /ws?token=BORRADO … 101`: la de 54,3 s
+es la de ana (abierta a las 23:05:04) y la de 44,8 s es la de eva (abierta a las 23:05:14). La de
+3,3 s corresponde a un quinto inicio de sesión, a las 23:05:55, que no salió de nuestros comandos de
+curl. Fue una conexión más desde el navegador, cerrada con el panel.
+
+**La captura.** No llegamos a guardarla: el panel se cerró a las 23:05:59 y, cuando intentamos hacer
+la captura, ya no había pestañas abiertas. No hay ninguna imagen de esta vuelta en el repositorio.
