@@ -15,3 +15,12 @@ Por eso todavía no hay `aviso_navegador.png` ni `logs_avisos.txt` de una misma 
 **Lo que sí está comprobado sin navegador.** `TestElAvisoLlegaSoloAlJugadorDueno`
 (`prueba_websocket.txt`) conecta a ana y a eva por WebSocket a un servidor real: a ana le llega el
 aviso y a eva no. Los `curl` del paso 2.3 dieron 401, 403 y 101.
+
+**Segunda vuelta, 23:05.** Con la API del reto arrancada con `go run .` y la misma página, abrimos
+`http://localhost:5173` en dos pestañas del navegador integrado de la app de Claude (un navegador
+real): ana a las 23:05:04 y eva a las 23:05:14, las dos con «Conectado como …». Con curl, luis creó
+el evento 36, ana se inscribió con su token (inscripción 10), ana la pasó a `pago_por_verificar` y
+luis a `confirmada` (201, 200, 200). En la pestaña de ana aparecieron, sin recargar,
+`estado_cambiado · registro 10 → pago_por_verificar` y `→ confirmada`. En la de eva, nada. Ese panel
+muestra una pestaña a la vez, así que no permite la captura de dos ventanas juntas. Falta guardar la
+captura y copiar el registro del servidor de esta vuelta a `logs_avisos.txt`.
