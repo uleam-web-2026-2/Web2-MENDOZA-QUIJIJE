@@ -94,7 +94,12 @@ type Almacen interface {
 type Servicio struct {
 	Almacen Almacen
 	Ahora   func() time.Time
+	avisos  Avisador // si es nil, el servicio no avisa (taller 13)
 }
+
+// AvisarCon conecta los avisos. Sin llamarla, el servicio funciona igual,
+// sin avisar: por eso las pruebas anteriores no cambian.
+func (s *Servicio) AvisarCon(a Avisador) { s.avisos = a }
 
 func (s *Servicio) reloj() time.Time {
 	if s.Ahora != nil {

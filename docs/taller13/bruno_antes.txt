@@ -1,0 +1,43 @@
+0_preparar (201 Created) - 14 ms
+Tests
+   ✓ Respuesta 201
+1_sin_token (401 Unauthorized) - 3 ms
+Tests
+   ✓ Respuesta 401
+2_login (200 OK) - 65 ms
+Tests
+   ✓ Respuesta 200
+   ✓ Entrega token
+3_con_token (200 OK) - 10 ms
+Tests
+   ✓ Respuesta 200
+4_rol_sin_permiso (403 Forbidden) - 8 ms
+Tests
+   ✓ Respuesta 403
+5_rol_correcto (200 OK) - 12 ms
+Tests
+   ✓ Respuesta 200
+   ✓ Queda confirmada
+6_transicion_prohibida (422 Unprocessable Entity) - 8 ms
+Tests
+   ✓ Respuesta 422
+
+📊 Execution Summary
+┌───────────────┬──────────────┐
+│ Metric        │    Result    │
+├───────────────┼──────────────┤
+│ Status        │    ✓ PASS    │
+├───────────────┼──────────────┤
+│ Requests      │ 7 (7 Passed) │
+├───────────────┼──────────────┤
+│ Tests         │     9/9      │
+├───────────────┼──────────────┤
+│ Assertions    │     0/0      │
+├───────────────┼──────────────┤
+│ Duration (ms) │     1768     │
+└───────────────┴──────────────┘
+npm notice
+npm notice New major version of npm available! 11.17.0 -> 12.2.3
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.3
+npm notice To update run: npm install -g npm@12.2.3
+npm notice

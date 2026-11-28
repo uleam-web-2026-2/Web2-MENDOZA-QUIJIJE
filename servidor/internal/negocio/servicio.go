@@ -201,5 +201,15 @@ func (s *Servicio) CambiarEstado(ctx context.Context, id uint, c CambioEstado, a
 		i.Estado = c.Estado
 		return tx.GuardarEstado(i)
 	})
-	return i, err
+	if err != nil {
+		return i, err
+	}
+	// Después de guardar: Transaccion ya hizo COMMIT, así que no se avisa de
+	// algo que no quedó en la base (si la regla o GuardarEstado fallan, err
+	// no es nil y se sale arriba). Se le avisa al dueño de la inscripción,
+	// el jugador que la creó con su token (JugadorID), y a nadie más.
+	if s.avisos != nil {
+		s.avisos.Enviar(i.JugadorID, Aviso{Tipo: "estado_cambiado", ID: i.ID, Estado: i.Estado})
+	}
+	return i, nil
 }

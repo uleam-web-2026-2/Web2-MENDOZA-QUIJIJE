@@ -24,7 +24,7 @@ func SembrarDemo(db *gorm.DB) error {
 		if err := sesion.Sembrar(tx); err != nil {
 			return err
 		}
-		for _, nombre := range []string{"ana", "luis"} {
+		for _, nombre := range []string{"ana", "eva", "luis"} {
 			var cuenta sesion.Usuario
 			if err := tx.Where("nombre = ?", nombre).First(&cuenta).Error; err != nil {
 				return err

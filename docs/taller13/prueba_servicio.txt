@@ -1,0 +1,10 @@
+=== RUN   TestCambiarEstadoAvisaAlJugadorDueno
+--- PASS: TestCambiarEstadoAvisaAlJugadorDueno (0.00s)
+=== RUN   TestTransicionProhibidaNoAvisa
+--- PASS: TestTransicionProhibidaNoAvisa (0.00s)
+=== RUN   TestSiGuardarFallaNoAvisa
+--- PASS: TestSiGuardarFallaNoAvisa (0.00s)
+=== RUN   TestJugadorAjenoNoCambiaNiAvisa
+--- PASS: TestJugadorAjenoNoCambiaNiAvisa (0.00s)
+PASS
+ok  	eventosports/internal/negocio	(cached)

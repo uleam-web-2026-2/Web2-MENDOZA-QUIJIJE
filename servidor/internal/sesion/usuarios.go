@@ -42,6 +42,7 @@ func (Usuario) TableName() string {
 func Sembrar(db *gorm.DB) error {
 	ejemplos := []struct{ nombre, rol, clave string }{
 		{"ana", RolJugador, "ana-2026"},       // CAMBIEN el rol
+		{"eva", RolJugador, "eva-2026"},       // otra jugadora: no debe recibir los avisos de ana (taller 13)
 		{"luis", RolOrganizador, "luis-2026"}, // CAMBIEN el rol
 	}
 	for _, e := range ejemplos {
