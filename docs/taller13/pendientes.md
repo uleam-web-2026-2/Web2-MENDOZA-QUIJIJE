@@ -1,39 +1,31 @@
-# Taller 13 · pendientes
+# Taller 13 · pendientes y cómo se hizo el punto 3
 
-## Punto 3 · la captura de las dos ventanas y `logs_avisos.txt`
+## La captura y el registro (vuelta de las 23:43)
 
-**Qué probamos.** A las 22:13 arrancamos la API (`go run .`, puerto 8080) y la página del paquete
-(`go run servir.go`, en `http://localhost:5173`). A las 22:14 creamos con curl un evento pagado de
-luis (31), la inscripción 5 con el token de ana, y le cambiamos el estado dos veces:
-ana a `pago_por_verificar` y luis a `confirmada`. Las tres respuestas fueron 201, 200 y 200.
+Con la API del reto arrancada con `go run .` (puerto 8080) y la página del paquete con
+`go run servir.go` (puerto 5173), la abrimos en el navegador integrado de la app de Claude, que es un
+navegador real. Ese panel muestra una sola pestaña a la vez. Por eso pusimos **dos copias de la
+página real** (`http://localhost:5173`) una al lado de la otra, cada una en un `iframe`, en una
+página auxiliar servida en el 5174. Cada copia inicia sesión y abre su propio WebSocket con el
+origen `http://localhost:5173`. La captura muestra un solo navegador con las dos páginas lado a lado,
+**no dos ventanas separadas**: así lo pudimos hacer, y lo dejamos dicho.
 
-**Qué salió.** En el registro del servidor no apareció ningún `POST /login` de la página ni ninguna
-línea `GET /ws`, y `netstat` no mostró conexiones de un navegador al 5173 ni al 8080: las ventanas
-de ana y eva no llegaron a conectarse a esa API, así que esos dos avisos no tuvieron a quién llegar.
-Por eso todavía no hay `aviso_navegador.png` ni `logs_avisos.txt` de una misma vuelta.
+- 23:43:01: ana entra a la izquierda y eva a la derecha. Las dos dicen «Conectado como …».
+- 23:43:10: luis crea el evento 37 con curl, y ana se inscribe con su token (inscripción 11).
+- 23:43:12: ana pasa la inscripción a `pago_por_verificar`. 23:43:14: luis la pasa a `confirmada`.
+- En la página de ana aparecen, sin recargar, `estado_cambiado · registro 11 → pago_por_verificar` y
+  `→ confirmada`. En la de eva, ningún aviso.
 
-**Lo que sí está comprobado sin navegador.** `TestElAvisoLlegaSoloAlJugadorDueno`
-(`prueba_websocket.txt`) conecta a ana y a eva por WebSocket a un servidor real: a ana le llega el
-aviso y a eva no. Los `curl` del paso 2.3 dieron 401, 403 y 101.
+[`aviso_navegador.png`](aviso_navegador.png) es la captura que tomó la herramienta del navegador
+integrado. Solo la pasamos de JPG a PNG, sin recortes ni retoques. [`logs_avisos.txt`](logs_avisos.txt)
+tiene las líneas del servidor de esa misma vuelta, con el token borrado con el `sed` del taller. Los
+dos primeros `POST /login` son las páginas de ana y eva, y los otros dos son luis y ana desde curl.
+Las dos líneas `GET /ws?token=BORRADO … 101` (36,7 s) aparecen al cerrar el panel.
 
-**Segunda vuelta, 23:05.** Con la API del reto arrancada con `go run .` y la misma página, abrimos
-`http://localhost:5173` en dos pestañas del navegador integrado de la app de Claude (un navegador
-real): ana a las 23:05:04 y eva a las 23:05:14, las dos con «Conectado como …». Con curl, luis creó
-el evento 36, ana se inscribió con su token (inscripción 10), ana la pasó a `pago_por_verificar` y
-luis a `confirmada` (201, 200, 200). En la pestaña de ana aparecieron, sin recargar,
-`estado_cambiado · registro 10 → pago_por_verificar` y `→ confirmada`. En la de eva, nada. Ese panel
-muestra una pestaña a la vez, así que no permite la captura de dos ventanas juntas. Falta guardar la
-captura y copiar el registro del servidor de esta vuelta a `logs_avisos.txt`.
+## Antes: vueltas que no sirvieron para la captura
 
-**El registro de esa vuelta.** [`logs_avisos.txt`](logs_avisos.txt) tiene las líneas del servidor de
-23:05:04 a 23:05:59, copiadas del registro de `go run .` y con el token borrado con el `sed` de
-`fase3/borrar_token.txt`. Los `POST /login` de 23:05:04 y 23:05:14 son las pestañas de ana y eva;
-los de 23:05:23 y 23:05:24 son luis y ana desde curl. Después vienen el `POST` del evento 36, el
-`POST` de la inscripción 10 con el token de ana y los dos `PATCH`. A las 23:05:59 el panel del
-navegador se cerró, y por eso aparecen juntas las líneas `GET /ws?token=BORRADO … 101`: la de 54,3 s
-es la de ana (abierta a las 23:05:04) y la de 44,8 s es la de eva (abierta a las 23:05:14). La de
-3,3 s corresponde a un quinto inicio de sesión, a las 23:05:55, que no salió de nuestros comandos de
-curl. Fue una conexión más desde el navegador, cerrada con el panel.
-
-**La captura.** No llegamos a guardarla: el panel se cerró a las 23:05:59 y, cuando intentamos hacer
-la captura, ya no había pestañas abiertas. No hay ninguna imagen de esta vuelta en el repositorio.
+- **22:14.** Hicimos los cambios de estado de la inscripción 5, pero ninguna ventana del navegador se
+  había conectado a la API: en el registro no hubo ningún `POST /login` de la página.
+- **23:05.** Ana y eva se conectaron en dos pestañas del navegador integrado, y ana recibió los dos
+  avisos de la inscripción 10. Pero el panel se cerró a las 23:05:59, antes de guardar la captura.
+- Desde Brave, en esta computadora, el servidor nunca recibió un inicio de sesión de la página.
