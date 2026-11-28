@@ -89,6 +89,10 @@ En la ráfaga (`rafaga.txt`), los cinco primeros intentos dieron 401 con `X-Rate
 `ClientIPFromRemoteAddr` saca la IP de `r.RemoteAddr`, la dirección de la conexión TCP (sin el puerto), y no lee ninguna cabecera. Por eso en el registro aparece `from ::1` en vez de `[::1]:60358`. Si la API queda detrás de un proxy (nginx, el balanceador de la nube), todas las conexiones llegan desde la IP del proxy. Todos los usuarios compartirían una sola cuenta, y cinco intentos fallidos de cualquiera bloquearían el login de todos durante un minuto.
 
 No se puede confiar en `X-Forwarded-For` sin más porque la escribe el cliente: un atacante pondría un valor distinto en cada petición y nunca llegaría al tope. Lo correcto es aceptarla solo cuando la conexión viene del proxy que conocemos, y tomar la IP que agregó ese proxy. Chi 5.5.0 lo trae: `middleware.ClientIPFromXFF("rango/del/proxy")`, o `ClientIPFromXFFTrustedProxies(1)` si hay exactamente un proxy delante y la red garantiza que nadie más llega a la API.
+#### Revisión de D4 (Evelin Quijije Bailon)
+En qué archivo y en qué función se decide que el aviso de una inscripción nueva
+les llegue solo a los organizadores: ...
+Qué pasa si luis tiene la página abierta en dos pestañas: ...
 
 ### Uso de IA en la semana 12
 Claude Code (Claude Opus 5.5) diagnosticó la conexión a PostgreSQL; corrió las búsquedas, las pruebas, la ráfaga y las peticiones de Bruno; escribió el código de CORS, del límite, del usuario de la base (reto) y de las pruebas nuevas; y redactó la auditoría y D1 a D7 a partir de esas salidas. Carlos aprobó cada comando. Las evidencias de `docs/taller12/` son las salidas tal como las dieron los comandos. La pareja tiene que revisar estas decisiones para poder defenderlas sin IA en el hito 3.
